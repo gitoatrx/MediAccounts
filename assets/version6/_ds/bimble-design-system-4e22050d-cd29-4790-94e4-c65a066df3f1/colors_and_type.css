@@ -1,0 +1,152 @@
+/* ============================================================
+   BIMBLE DESIGN SYSTEM — Colors & Type
+   Source of truth: gitoatrx/Bimble-Pro-Frontend-2026 (app/globals.css,
+   app/layout.tsx). Bimble is a Canadian healthcare appointment platform.
+
+   Fonts are Google Fonts (loaded via next/font in the source). In HTML
+   artifacts, include:
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+   ============================================================ */
+
+:root {
+  /* ---- Core palette (light, the default & only real theme in use) ---- */
+  --background: #f8fafc;        /* app canvas (note: marketing body uses #FAFCFB) */
+  --foreground: #0f172a;        /* primary text (marketing body uses #0D2237) */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  --primary: #5c70ff;           /* periwinkle indigo — THE brand color */
+  --primary-foreground: #ffffff;
+  --secondary: #eef2ff;         /* pale indigo wash */
+  --secondary-foreground: #0f172a;
+  --muted: #e5e7eb;
+  --muted-foreground: #64748b;  /* slate-500, all supporting copy */
+  --accent: #eff6ff;            /* pale blue, hover wash */
+  --accent-foreground: #0f172a;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --border: #dbe3ff;            /* soft periwinkle border — not gray */
+  --input: #ffffff;
+  --ring: #5c70ff;
+
+  /* ---- Tinted surfaces used everywhere (primary at low alpha) ---- */
+  --primary-05: rgba(92, 112, 255, 0.05);  /* tinted panels, eyebrow chips */
+  --primary-10: rgba(92, 112, 255, 0.10);  /* icon chips, "Live" badges */
+  --primary-20: rgba(92, 112, 255, 0.20);  /* selected ring */
+  --slate-50:  #f8fafc;         /* nested panel fill inside white cards */
+  --slate-200: #e2e8f0;         /* neutral border on the Pro/onboarding flow */
+
+  /* ---- Dark surfaces (footer, CTA blocks) ---- */
+  --ink: #0b1220;               /* footer + dark-mode background */
+  --ink-foreground: #e5eefc;
+
+  /* ---- Radii (base 16px, scales around it) ---- */
+  --radius: 1rem;               /* 16px — the base */
+  --radius-sm: calc(var(--radius) - 4px);   /* 12px */
+  --radius-md: calc(var(--radius) - 2px);   /* 14px */
+  --radius-lg: var(--radius);                /* 16px */
+  --radius-xl: calc(var(--radius) + 4px);    /* 20px */
+  --radius-2xl: 1.5rem;         /* 24px — nested panels */
+  --radius-card: 2rem;          /* 32px — big marketing feature cards */
+  --radius-pill: 9999px;        /* badges, segmented toggles */
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-card: 0 24px 72px rgba(15, 23, 42, 0.12);  /* floating hero cards */
+
+  /* ---- Type families ---- */
+  --font-display: "Montserrat", "Inter", sans-serif;  /* all headings */
+  --font-sans: "Inter", system-ui, sans-serif;        /* body + UI */
+  --font-mono: "Inter", monospace;                    /* same as sans in source */
+
+  /* ---- Ambient background glow (marketing pages) ---- */
+  --bg-glow:
+    radial-gradient(circle at top left, rgba(92, 112, 255, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(15, 23, 42, 0.04), transparent 24%);
+}
+
+/* ============================================================
+   SEMANTIC TYPE — Montserrat for display/headings, Inter for body.
+   Headings run TIGHT (negative tracking). Eyebrows run WIDE + UPPERCASE.
+   ============================================================ */
+
+.bm-hero {                 /* hero h1 — oversized, ultra-tight, near-1 leading */
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(3.15rem, 6vw, 5.25rem);
+  line-height: 0.96;
+  letter-spacing: -0.08em;
+  color: var(--foreground);
+}
+
+.bm-h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2.25rem;        /* ~36px */
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  color: var(--foreground);
+}
+
+.bm-h2 {                   /* section titles */
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2rem;           /* 32px, up to 2.25 on lg */
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  color: var(--foreground);
+}
+
+.bm-h3 {                   /* card titles */
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;         /* 24px */
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.bm-eyebrow {              /* the signature label above section titles */
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.6875rem;      /* 11px */
+  line-height: 1;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.bm-lead {                 /* large supporting paragraph under titles */
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 1.125rem;       /* 18px, 20px on lg */
+  line-height: 1.7;
+  color: var(--muted-foreground);
+}
+
+.bm-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.875rem;       /* 14px base UI text */
+  line-height: 1.7;
+  color: var(--muted-foreground);
+}
+
+.bm-label {                /* form labels, strong inline */
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--foreground);
+}
+
+.bm-caption {              /* tiny uppercase data labels inside cards */
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.6875rem;      /* 11px */
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}

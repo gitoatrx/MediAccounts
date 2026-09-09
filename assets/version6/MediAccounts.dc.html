@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/bimble-design-system-4e22050d-cd29-4790-94e4-c65a066df3f1/colors_and_type.css">
+<link rel="stylesheet" href="_ds/bimble-design-system-4e22050d-cd29-4790-94e4-c65a066df3f1/preview/_base.css">
+<script src="_ds/bimble-design-system-4e22050d-cd29-4790-94e4-c65a066df3f1/_ds_bundle.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="./lucide.min.js"></script>
+<style>
+  body { margin: 0; background: #eef0f6; }
+  a { color: #5c70ff; text-decoration: none; }
+  a:hover { color: #3f55f0; }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  input, button { font-family: "Inter", system-ui, sans-serif; }
+  input:focus { outline: none; border-color: #5c70ff !important; box-shadow: 0 0 0 3px rgba(92,112,255,0.14); }
+  input::placeholder { color: #9aa1b4; }
+  button { transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 120ms ease; }
+  button:active { transform: scale(0.98); }
+  a { transition: color 150ms ease, background-color 150ms ease; }
+  .mx-scroll::-webkit-scrollbar { width: 0; }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 44px 24px 64px; font-family: 'Inter', system-ui, sans-serif; background: #eef0f6;">
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+    <div style="font-family: 'Inter', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: #5c70ff;">MEDIACCOUNTS · REACT NATIVE PROTOTYPE</div>
+  </div>
+
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height: 100%; position: relative; display: flex; flex-direction: column; background: #f4f6fa; overflow: hidden;">
+
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+        <div style="flex: 1; display: flex; flex-direction: column; background: #0f172a; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -160px; right: -140px; width: 420px; height: 420px; border-radius: 999px; background: radial-gradient(circle, rgba(92,112,255,0.45), rgba(92,112,255,0) 70%);"></div>
+          <div style="flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 56px 28px 24px;">
+            <div style="width: 64px; height: 64px; border-radius: 20px; background: #5c70ff; display: flex; align-items: center; justify-content: center; box-shadow: 0 20px 50px rgba(92,112,255,0.35);"><i data-lucide="receipt" style="width: 30px; height: 30px; color: #ffffff;"></i></div>
+            <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.04em; color: #ffffff;">MediAccounts</div>
+          </div>
+          <div style="position: relative; background: #ffffff; border-radius: 32px 32px 0 0; padding: 26px 24px 40px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -0.03em; color: #0f172a;">Sign in</div>
+              <div style="font-size: 13px; color: #6b7385;">Track spending and bills for your business.</div>
+            </div>
+            <button onClick="{{ openGoogle }}" style="width: 100%; height: 50px; border-radius: 14px; border: 1px solid #e7eaf3; background: #ffffff; color: #0f172a; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;" style-hover="background: #f4f6fa; border-color: #c9cfdd;">
+              <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>
+              <span>Continue with Google</span>
+            </button>
+            <div style="display: flex; align-items: center; gap: 12px;"><span style="flex: 1; height: 1px; background: #e7eaf3;"></span><span style="font-size: 12px; color: #9aa1b4;">or</span><span style="flex: 1; height: 1px; background: #e7eaf3;"></span></div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: center; height: 50px; border-radius: 14px; border: 1px solid {{ emailBorder }}; background: #ffffff; padding: 0 6px 0 14px; gap: 8px;">
+                <i data-lucide="mail" style="width: 17px; height: 17px; color: #9aa1b4; flex: none;"></i>
+                <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="Work email" style="flex: 1; min-width: 0; border: none; background: transparent; font-size: 14px; color: #0f172a; box-shadow: none !important;" />
+                <button onClick="{{ sendLink }}" style="flex: none; height: 38px; padding: 0 14px; border: none; border-radius: 10px; background: #0f172a; color: #ffffff; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;" style-hover="background: #1e293b;">{{ codeLabel }}</button>
+              </div>
+              <sc-if value="{{ emailError }}"><div style="font-size: 12px; color: #dc2626; padding-left: 2px;">Enter a valid email address.</div></sc-if>
+              <sc-if value="{{ emailOk }}"><div style="font-size: 12px; color: #9aa1b4; padding-left: 2px;">We'll send a one-time code. No password needed.</div></sc-if>
+            </div>
+
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOtp }}">
+        <div style="flex: 1; display: flex; flex-direction: column; background: #ffffff; padding: 64px 24px 40px;">
+          <button onClick="{{ goLogin }}" style="width: 36px; height: 36px; border-radius: 11px; border: 1px solid #e7eaf3; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="background: #f4f6fa; border-color: #c9cfdd;"><i data-lucide="arrow-left" style="width: 17px; height: 17px; color: #0f172a;"></i></button>
+          <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; margin-top: 28px;"><i data-lucide="mail-open" style="width: 26px; height: 26px; color: #5c70ff;"></i></div>
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -0.04em; color: #0f172a; margin-top: 18px;">Enter your code</div>
+          <div style="font-size: 14px; color: #6b7385; margin-top: 6px; line-height: 1.5;">Sent to</div>
+          <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-top: 2px;">{{ email }}</div>
+          <div style="display: flex; gap: 8px; margin-top: 28px;">
+            <sc-for list="{{ otpBoxes }}" as="box" hint-placeholder-count="6">
+              <input value="{{ box.value }}" onChange="{{ box.onChange }}" maxLength="1" inputMode="numeric" style="width: 100%; min-width: 0; height: 56px; border-radius: 12px; border: 1px solid #e7eaf3; background: #f8fafc; text-align: center; font-size: 20px; font-weight: 600; color: #0f172a; padding: 0;" />
+            </sc-for>
+          </div>
+          <button onClick="{{ verifyOtp }}" style="margin-top: 22px; height: 50px; border: none; border-radius: 14px; background: {{ verifyBg }}; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer;">Continue</button>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 20px; font-size: 13px;">
+            <a href="#" onClick="{{ resendOtp }}" style="font-weight: 600;">Resend code</a>
+            <span style="width: 1px; height: 12px; background: #e7eaf3;"></span>
+            <a href="#" onClick="{{ goLogin }}" style="font-weight: 600; color: #6b7385;">Change email</a>
+          </div>
+          <div style="text-align: center; font-size: 12px; color: #9aa1b4; margin-top: 10px; min-height: 16px;">{{ resendNote }}</div>
+          <div style="margin-top: auto; text-align: center; font-size: 12px; color: #9aa1b4;">Didn't get it? Check spam or ask your admin to confirm your email.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEmpty }}">
+        <div style="flex: 1; display: flex; flex-direction: column; background: #0f172a; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -160px; right: -140px; width: 420px; height: 420px; border-radius: 999px; background: radial-gradient(circle, rgba(92,112,255,0.45), rgba(92,112,255,0) 70%);"></div>
+          <div style="position: relative; display: flex; align-items: center; justify-content: space-between; padding: 64px 24px 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 11px; background: #5c70ff; display: flex; align-items: center; justify-content: center;"><i data-lucide="receipt" style="width: 17px; height: 17px; color: #ffffff;"></i></div>
+              <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.02em; color: #ffffff;">MediAccounts</div>
+            </div>
+            <button onClick="{{ logout }}" style="height: 34px; padding: 0 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); cursor: pointer;">Sign out</button>
+          </div>
+
+          <div style="flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; padding: 20px 28px 30px;">
+            <div style="position: relative; width: 124px; height: 124px; display: flex; align-items: center; justify-content: center;">
+              <div style="position: absolute; inset: 0; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);"></div>
+              <div style="position: absolute; width: 70px; height: 84px; border-radius: 16px; background: #ffffff; box-shadow: 0 16px 40px rgba(0,0,0,0.30); display: flex; align-items: center; justify-content: center;"><i data-lucide="building-2" style="width: 30px; height: 30px; color: #5c70ff;"></i></div>
+              <div style="position: absolute; right: 12px; bottom: 14px; width: 34px; height: 34px; border-radius: 999px; background: #5c70ff; border: 3px solid #0f172a; display: flex; align-items: center; justify-content: center;"><i data-lucide="plus" style="width: 17px; height: 17px; color: #ffffff;"></i></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.04em; color: #ffffff;">No business yet</div>
+              <div style="font-size: 14px; color: rgba(255,255,255,0.62); line-height: 1.6; max-width: 270px;">Three quick steps and you're set up.</div>
+            </div>
+          </div>
+
+          <div style="position: relative; background: #ffffff; border-radius: 32px 32px 0 0; padding: 26px 24px 44px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <sc-for list="{{ emptyPerks }}" as="p" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #f4f6fa;">
+                  <div style="width: 26px; height: 26px; border-radius: 8px; background: #5c70ff; color: #ffffff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none;">{{ p.n }}</div>
+                  <div style="font-size: 13px; font-weight: 500; color: #0f172a;">{{ p.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <button onClick="{{ goNewBiz }}" style="height: 54px; border: none; border-radius: 16px; background: #5c70ff; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: #4a5ff5;"><i data-lucide="plus" style="width: 18px; height: 18px; color: #ffffff;"></i>Add business</button>
+            <div style="text-align: center; font-size: 12px; color: #9aa1b4;">Invited by your admin? The business will appear here once they add you.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isNewBiz }}">
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; background: #f4f6fa;">
+          <div style="padding: 60px 20px 14px; background: #ffffff; border-bottom: 1px solid #e7eaf3; display: flex; align-items: center; gap: 12px;">
+            <button onClick="{{ cancelNewBiz }}" style="width: 36px; height: 36px; border-radius: 11px; border: 1px solid #e7eaf3; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;" style-hover="background: #f4f6fa; border-color: #c9cfdd;"><i data-lucide="arrow-left" style="width: 17px; height: 17px; color: #0f172a;"></i></button>
+            <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 20px; letter-spacing: -0.03em; color: #0f172a;">Add business</div>
+          </div>
+
+          <div class="mx-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 14px;">
+              <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Business</div>
+              <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Business name <span style="color: #dc2626;">*</span></label><input value="{{ newBizName }}" onChange="{{ onNewBizName }}" placeholder="e.g. Westside Retail" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+              <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Alias name</label><input placeholder="Short name shown in the app" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+            </div>
+
+            <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 14px;">
+              <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Address</div>
+              <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Street address <span style="color: #dc2626;">*</span></label><input placeholder="1042 Broadway W" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+              <div style="display: flex; gap: 10px;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Unit</label><input placeholder="104" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+                <div style="flex: 2; display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">City</label><input placeholder="Vancouver" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Province</label>
+                  <input value="{{ newBizProv }}" onChange="{{ onNewBizProv }}" placeholder="BC" maxLength="2" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a; text-transform: uppercase;" />
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Postal code</label><input placeholder="V6H 1E8" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px;">
+              <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Institutions</div>
+              <button onClick="{{ addInstitution }}" style="display: flex; align-items: center; gap: 6px; white-space: nowrap; flex: none; height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 12px; font-weight: 600; color: #5c70ff; cursor: pointer;"><i data-lucide="plus" style="width: 14px; height: 14px; color: #5c70ff;"></i>Add more</button>
+            </div>
+
+            <sc-for list="{{ institutions }}" as="ins" hint-placeholder-count="1">
+              <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7385;">Institution {{ ins.n }}</div>
+                  <sc-if value="{{ ins.removable }}"><button onClick="{{ ins.remove }}" style="width: 28px; height: 28px; border-radius: 9px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i data-lucide="trash-2" style="width: 15px; height: 15px; color: #9aa1b4;"></i></button></sc-if>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Institution name <span style="color: #dc2626;">*</span></label><input value="{{ ins.name }}" onChange="{{ ins.onName }}" placeholder="e.g. RBC, TD, Vancity" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+                <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Account type</label>
+                  <button onClick="{{ ins.openType }}" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; font-weight: 500; color: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">{{ ins.type }}<i data-lucide="chevron-down" style="width: 15px; height: 15px; color: #6b7385;"></i></button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Account number <span style="color: #dc2626;">*</span></label><input value="{{ ins.number }}" onChange="{{ ins.onNumber }}" inputMode="numeric" placeholder="Shown masked, e.g. **** 5614" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+                <button onClick="{{ ins.setPrimary }}" style="display: flex; align-items: center; gap: 10px; padding: 0; border: none; background: transparent; cursor: pointer; text-align: left;">
+                  <span style="width: 20px; height: 20px; border-radius: 999px; border: 2px solid {{ ins.radioBorder }}; display: flex; align-items: center; justify-content: center;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {{ ins.radioFill }};"></span></span>
+                  <span style="font-size: 13px; font-weight: 500; color: #0f172a;">Primary account</span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; gap: 10px; padding: 12px 16px 34px; background: #ffffff; border-top: 1px solid #e7eaf3;">
+            <button onClick="{{ cancelNewBiz }}" style="flex: 1; height: 50px; border-radius: 14px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 14px; font-weight: 600; color: #0f172a; cursor: pointer;" style-hover="background: #f4f6fa; border-color: #c9cfdd;">Cancel</button>
+            <button onClick="{{ createBiz }}" style="flex: 2; height: 50px; border: none; border-radius: 14px; background: {{ createBg }}; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer;">Save</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isApp }}">
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
+
+          <sc-if value="{{ showBack }}">
+          <div style="padding: 60px 20px 14px; background: #ffffff; border-bottom: 1px solid #e7eaf3; display: flex; align-items: center; gap: 12px;">
+            <sc-if value="{{ showBack }}">
+              <button onClick="{{ back }}" style="width: 36px; height: 36px; border-radius: 11px; border: 1px solid #e7eaf3; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;" style-hover="background: #f4f6fa; border-color: #c9cfdd;">
+                <i data-lucide="arrow-left" style="width: 17px; height: 17px; color: #0f172a;"></i>
+              </button>
+            </sc-if>
+            <div style="min-width: 0;">
+              <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 20px; letter-spacing: -0.03em; color: #0f172a;">{{ screenTitle }}</div>
+            </div>
+          </div>
+          </sc-if>
+
+          <div class="mx-scroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: {{ scrollPad }};">
+
+            <sc-if value="{{ isHome }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; gap: 8px;">
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9aa1b4; padding-left: 2px;">Business</div>
+                  <button onClick="{{ openBizSheet }}" style="width: 100%; min-width: 0; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="building-2" style="width: 15px; height: 15px; color: #6b7385; flex: none;"></i>
+                    <span style="flex: 1; min-width: 0; text-align: left; font-size: 13px; font-weight: 500; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ biz.name }}</span>
+                    <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9aa1b4; flex: none;"></i>
+                  </button>
+                  </div>
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9aa1b4; padding-left: 2px;">Bank account</div>
+                  <button onClick="{{ openAcctSheet }}" style="width: 100%; min-width: 0; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="landmark" style="width: 15px; height: 15px; color: #6b7385; flex: none;"></i>
+                    <span style="flex: 1; min-width: 0; text-align: left; font-size: 13px; font-weight: 500; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ acct.short }}</span>
+                    <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9aa1b4; flex: none;"></i>
+                  </button>
+                  </div>
+                </div>
+
+                <div style="padding: 22px; border-radius: 24px; background: #0f172a; background-image: radial-gradient(circle at 100% 0%, rgba(92,112,255,0.35), transparent 55%);">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.62);">Total spent</div>
+                    <button onClick="{{ openRangeSheet }}" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.10); color: #ffffff; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;">{{ range }}<i data-lucide="chevron-down" style="width: 14px; height: 14px; color: rgba(255,255,255,0.8);"></i></button>
+                  </div>
+                  <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 36px; letter-spacing: -0.04em; color: #ffffff; margin-top: 10px;">{{ totals.spendLabel }}</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div style="padding: 14px 16px; border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;"><span style="font-size: 12px; color: #6b7385;">Categories</span><i data-lucide="tag" style="width: 16px; height: 16px; color: #5c70ff;"></i></div>
+                    <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 22px; color: #0f172a; margin-top: 8px;">{{ totals.categories }}</div>
+                  </div>
+                  <button onClick="{{ goReceipts }}" style="text-align: left; padding: 14px 16px; border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; cursor: pointer;" style-hover="background: #f4f6fa;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;"><span style="font-size: 12px; color: #6b7385;">Bills missing</span><i data-lucide="receipt" style="width: 16px; height: 16px; color: #5c70ff;"></i></div>
+                    <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 22px; color: #0f172a; margin-top: 8px;">{{ totals.missing }}</div>
+                  </button>
+                </div>
+
+                <button onClick="{{ goQuickUpload }}" style="height: 52px; border-radius: 16px; background: #5c70ff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 600; color: #ffffff; white-space: nowrap;" style-hover="background: #4a5ff5;"><i data-lucide="upload-cloud" style="width: 18px; height: 18px; color: #ffffff;"></i>Upload Bill</button>
+                <div style="display: flex; gap: 8px;">
+                  <button onClick="{{ goCsv }}" style="flex: 1; height: 44px; border-radius: 14px; background: #ffffff; border: 1px solid #e7eaf3; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: #0f172a; white-space: nowrap;" style-hover="background: #f4f6fa;"><i data-lucide="file-spreadsheet" style="width: 16px; height: 16px; color: #5c70ff;"></i>Upload CSV</button>
+                  <button onClick="{{ exportCsv }}" style="flex: 1; height: 44px; border-radius: 14px; background: #ffffff; border: 1px solid #e7eaf3; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: #0f172a; white-space: nowrap;" style-hover="background: #f4f6fa;"><i data-lucide="download" style="width: 16px; height: 16px; color: #5c70ff;"></i>Export</button>
+                </div>
+
+                <sc-if value="{{ noAccounts }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 28px 20px; border-radius: 20px; background: #ffffff; border: 1px dashed #c9cfdd;">
+                    <div style="width: 48px; height: 48px; border-radius: 15px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center;"><i data-lucide="landmark" style="width: 22px; height: 22px; color: #5c70ff;"></i></div>
+                    <div style="font-size: 15px; font-weight: 600; color: #0f172a;">Connect a bank account</div>
+                    <div style="font-size: 13px; color: #6b7385; line-height: 1.5; max-width: 240px;">Transactions will appear here once your bank is linked.</div>
+                    <button onClick="{{ connectBank }}" style="margin-top: 4px; height: 44px; padding: 0 20px; border: none; border-radius: 12px; background: #5c70ff; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer;">Connect bank</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ noTxnsYet }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 28px 20px; border-radius: 20px; background: #ffffff; border: 1px dashed #c9cfdd;">
+                    <div style="width: 48px; height: 48px; border-radius: 15px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center;"><i data-lucide="upload-cloud" style="width: 22px; height: 22px; color: #5c70ff;"></i></div>
+                    <div style="font-size: 15px; font-weight: 600; color: #0f172a;">No transactions yet</div>
+                    <div style="font-size: 13px; color: #6b7385; line-height: 1.5; max-width: 250px;">Download a CSV from your online banking and upload it here.</div>
+                    <button onClick="{{ goCsv }}" style="margin-top: 4px; height: 44px; padding: 0 20px; border: none; border-radius: 12px; background: #5c70ff; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer;">Upload CSV</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ hasTxns }}">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 0 2px;">
+                  <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 16px; letter-spacing: -0.02em; color: #0f172a;">Recent transactions</div>
+                    <div style="font-size: 12px; color: #9aa1b4;">{{ range }}</div>
+                  </div>
+                  <a href="#" onClick="{{ goTransactions }}" style="display: flex; align-items: center; gap: 2px; height: 28px; padding: 0 6px 0 10px; border-radius: 999px; background: rgba(92,112,255,0.08); font-size: 12px; font-weight: 600; color: #5c70ff;">See all<i data-lucide="chevron-right" style="width: 14px; height: 14px; color: #5c70ff;"></i></a>
+                </div>
+                </sc-if>
+
+                <sc-if value="{{ hasTxns }}">
+                <div style="border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; overflow: hidden;">
+                  <sc-for list="{{ recent }}" as="t" hint-placeholder-count="4">
+                    <button onClick="{{ t.open }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; background: #ffffff; border: none; border-bottom: 1px solid #f0f2f7; cursor: pointer;" style-hover="background: #f8fafc;">
+                      <div style="width: 38px; height: 38px; border-radius: 12px; background: {{ t.tintBg }}; border: 1px solid {{ t.tintBorder }}; display: flex; align-items: center; justify-content: center; flex: none;">
+                        <i data-lucide="{{ t.icon }}" style="width: 17px; height: 17px; color: {{ t.tintAccent }};"></i>
+                      </div>
+                      <div style="min-width: 0; flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ t.desc }}</div>
+                        <div style="font-size: 12px; color: #6b7385; margin-top: 2px;">{{ t.category }}</div>
+                      </div>
+                      <div style="text-align: right; flex: none;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ t.amountLabel }}</div>
+                        <div style="font-size: 11px; color: #9aa1b4; margin-top: 2px;">{{ t.date }}</div>
+                      </div>
+                    </button>
+                  </sc-for>
+                </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isTransactions }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 46px; border-radius: 14px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <i data-lucide="search" style="width: 17px; height: 17px; color: #9aa1b4;"></i>
+                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search transactions" style="flex: 1; border: none; background: transparent; font-size: 14px; color: #0f172a; box-shadow: none !important;" />
+                </div>
+
+
+                <sc-if value="{{ noTxnsYet }}">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 40px 20px; font-size: 13px; color: #6b7385;">No transactions yet.<button onClick="{{ goCsv }}" style="height: 40px; padding: 0 18px; border: none; border-radius: 12px; background: #5c70ff; color: #ffffff; font-size: 13px; font-weight: 600; cursor: pointer;">Upload CSV</button></div>
+                </sc-if>
+                <sc-if value="{{ noAccounts }}">
+                  <div style="text-align: center; padding: 40px 20px; font-size: 13px; color: #6b7385;">Add a bank account to this business first.</div>
+                </sc-if>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <sc-for list="{{ filtered }}" as="t" hint-placeholder-count="6">
+                    <div style="border-radius: 18px; background: #ffffff; border: 1px solid {{ t.tintBorder }}; overflow: hidden;">
+                      <button onClick="{{ t.toggle }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; background: #ffffff; border: none; border-left: 4px solid {{ t.tintAccent }}; cursor: pointer;" style-hover="background: #f8fafc;">
+                        <div style="flex: 1; min-width: 0;">
+                          <div style="font-size: 14px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ t.desc }}</div>
+                          <div style="font-size: 12px; color: #6b7385; margin-top: 2px;">{{ t.date }} · {{ t.category }}</div>
+                        </div>
+                        <div style="font-size: 15px; font-weight: 600; color: #0f172a; flex: none;">{{ t.amountLabel }}</div>
+                        <span style="display: flex; flex: none; transform: rotate({{ t.chevRot }}); transition: transform 180ms ease;"><i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #9aa1b4;"></i></span>
+                      </button>
+                      <sc-if value="{{ t.expanded }}">
+                      <div style="padding: 12px 16px 14px; background: {{ t.tintBg }}; border-top: 1px solid {{ t.tintBorder }}; border-left: 4px solid {{ t.tintAccent }}; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; gap: 8px;">
+                          <div style="flex: 1.3; min-width: 0;"><div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: #9aa1b4; margin-bottom: 5px;">Category</div>
+                            <button onClick="{{ t.pickCat }}" style="width: 100%; height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                              <span style="font-size: 13px; font-weight: 500; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ t.category }}</span>
+                              <i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #9aa1b4; flex: none;"></i>
+                            </button>
+                          </div>
+                          <div style="flex: 1; min-width: 0;"><div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: #9aa1b4; margin-bottom: 5px;">GST</div>
+                            <div style="height: 38px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; display: flex; align-items: center; padding: 0 5px 0 10px; gap: 4px;">
+                              <input value="{{ t.gstVal }}" onChange="{{ t.onGst }}" inputMode="decimal" placeholder="0.00" style="flex: 1; min-width: 0; border: none; background: transparent; font-size: 13px; color: #0f172a; padding: 0;" />
+                              <button onClick="{{ t.toggleGst }}" title="Apply 5%" style="flex: none; height: 26px; padding: 0 7px; border-radius: 7px; cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap; border: none; background: {{ t.gstBg }}; color: {{ t.gstColor }};">5%</button>
+                            </div>
+                          </div>
+                          <div style="flex: 0.8; min-width: 0;"><div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: #9aa1b4; margin-bottom: 5px;">PST</div>
+                            <input value="{{ t.pstVal }}" onChange="{{ t.onPst }}" inputMode="decimal" placeholder="0.00" style="width: 100%; height: 38px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 10px; font-size: 13px; color: #0f172a;" />
+                          </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: flex-end;">
+                          <div style="flex: 1; min-width: 0;"><div style="font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: #9aa1b4; margin-bottom: 5px;">Memo</div>
+                            <input value="{{ t.memo }}" onChange="{{ t.onMemo }}" placeholder="Add a note" style="width: 100%; height: 38px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 12px; font-size: 13px; color: #0f172a;" />
+                          </div>
+                          <button onClick="{{ t.upload }}" title="Upload bill" style="flex: none; height: 38px; padding: 0 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; border: 1px solid #b9c3ff; background: rgba(92,112,255,0.06); font-size: 12px; font-weight: 600; color: #5c70ff; white-space: nowrap;"><i data-lucide="upload-cloud" style="width: 15px; height: 15px; color: #5c70ff;"></i>Bill</button>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end;"><a href="#" onClick="{{ t.openLink }}" style="font-size: 12px; font-weight: 600;">View details</a></div>
+                      </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCsv }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 14px 16px; border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="landmark" style="width: 18px; height: 18px; color: #5c70ff;"></i></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ acct.bank }}</div>
+                    <div style="font-size: 12px; color: #6b7385;">{{ acct.masked }} · {{ biz.name }}</div>
+                  </div>
+                  <button onClick="{{ openAcctSheet }}" style="height: 32px; padding: 0 12px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 12px; font-weight: 600; color: #5c70ff; cursor: pointer;" style-hover="background: rgba(92,112,255,0.05); border-color: #b9c3ff;">Change</button>
+                </div>
+
+                <sc-if value="{{ csvIdle }}">
+                  <button onClick="{{ pickCsv }}" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 40px 20px; border-radius: 20px; background: #ffffff; border: 1px dashed #c9cfdd; cursor: pointer;" style-hover="background: #f4f6fa;">
+                    <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center;"><i data-lucide="file-spreadsheet" style="width: 26px; height: 26px; color: #5c70ff;"></i></div>
+                    <div style="font-size: 15px; font-weight: 600; color: #0f172a;">Choose CSV file</div>
+                    <div style="font-size: 12px; color: #6b7385;">Download it from your online banking, then pick it here</div>
+                  </button>
+                </sc-if>
+
+                <sc-if value="{{ csvReady }}">
+                  <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(21,128,61,0.08); display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="file-check" style="width: 18px; height: 18px; color: #15803d;"></i></div>
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">statement_aug_2026.csv</div>
+                        <div style="font-size: 12px; color: #6b7385;">{{ csvCount }} rows · Aug 24 – Sep 2</div>
+                      </div>
+                      <button onClick="{{ clearCsv }}" style="width: 30px; height: 30px; border-radius: 9px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i data-lucide="x" style="width: 15px; height: 15px; color: #9aa1b4;"></i></button>
+                    </div>
+                    <div style="border-top: 1px solid #e7eaf3; padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7385;">Preview</div>
+                      <sc-for list="{{ csvPreview }}" as="r" hint-placeholder-count="3">
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
+                          <span style="color: #6b7385; width: 46px; flex: none;">{{ r.date }}</span>
+                          <span style="flex: 1; min-width: 0; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.desc }}</span>
+                          <span style="font-weight: 600; color: #0f172a;">{{ r.amountLabel }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <button onClick="{{ importCsv }}" style="height: 52px; border: none; border-radius: 16px; background: #5c70ff; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: #4a5ff5;">Import {{ csvCount }} transactions</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isDetails }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 20px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; box-shadow: 0 1px 2px rgba(15,23,42,0.03);">
+                  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa1b4;">Amount</div>
+                  <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 36px; letter-spacing: -0.04em; color: #0f172a; margin-top: 6px;">{{ txn.amountLabel }}</div>
+                  <div style="font-size: 14px; color: #6b7385; margin-top: 4px;">{{ txn.fullDate }}</div>
+                  <div style="font-size: 15px; font-weight: 600; color: #0f172a; margin-top: 14px;">{{ txn.desc }}</div>
+                </div>
+
+                <div style="border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; overflow: hidden;">
+                  <button onClick="{{ openCatSheet }}" style="width: 100%; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; background: #ffffff; border: none; border-bottom: 1px solid #e7eaf3; cursor: pointer;" style-hover="background: #f8fafc;">
+                    <span style="font-size: 13px; color: #6b7385;">Category</span>
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #0f172a;">{{ txn.category }}<i data-lucide="chevron-down" style="width: 14px; height: 14px; color: #6b7385;"></i></span>
+                  </button>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #e7eaf3;">
+                    <span style="font-size: 13px; color: #6b7385;">GST</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <div style="width: 120px; height: 40px; border-radius: 10px; border: 1px solid #e7eaf3; background: #f8fafc; display: flex; align-items: center; padding: 0 10px; gap: 4px;">
+                        <span style="font-size: 13px; color: #9aa1b4;">$</span>
+                        <input value="{{ gstEdit }}" onChange="{{ onGstEdit }}" inputMode="decimal" placeholder="0.00" style="flex: 1; min-width: 0; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #0f172a; text-align: right; box-shadow: none !important;" />
+                      </div>
+                      <button onClick="{{ autoGst }}" style="height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 12px; font-weight: 600; color: #5c70ff; cursor: pointer; white-space: nowrap;" style-hover="background: rgba(92,112,255,0.05); border-color: #b9c3ff;">5%</button>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #e7eaf3;">
+                    <span style="font-size: 13px; color: #6b7385;">PST</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <div style="width: 120px; height: 40px; border-radius: 10px; border: 1px solid #e7eaf3; background: #f8fafc; display: flex; align-items: center; padding: 0 10px; gap: 4px;">
+                        <span style="font-size: 13px; color: #9aa1b4;">$</span>
+                        <input value="{{ pstEdit }}" onChange="{{ onPstEdit }}" inputMode="decimal" placeholder="0.00" style="flex: 1; min-width: 0; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #0f172a; text-align: right; box-shadow: none !important;" />
+                      </div>
+                      <button onClick="{{ autoPst }}" style="height: 40px; padding: 0 10px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 12px; font-weight: 600; color: #5c70ff; cursor: pointer; white-space: nowrap;" style-hover="background: rgba(92,112,255,0.05); border-color: #b9c3ff;">7%</button>
+                    </div>
+                  </div>
+                  <div style="padding: 16px;">
+                    <div style="font-size: 13px; color: #6b7385; margin-bottom: 8px;">Memo</div>
+                    <input value="{{ memo }}" onChange="{{ onMemo }}" placeholder="Add a note" style="width: 100%; height: 44px; border-radius: 12px; border: 1px solid #e7eaf3; background: #f8fafc; padding: 0 12px; font-size: 14px; color: #0f172a;" />
+                  </div>
+                </div>
+
+                <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Bill</div>
+                    <div style="font-size: 11px; font-weight: 600; color: {{ txn.receiptColor }};">{{ txn.receiptLabel }}</div>
+                  </div>
+                  <div style="margin-top: 12px; height: 168px; border-radius: 18px; border: 1px dashed #e7eaf3; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                    <i data-lucide="{{ txn.previewIcon }}" style="width: 26px; height: 26px; color: #5c70ff;"></i>
+                    <div style="font-size: 12px; color: #6b7385;">{{ txn.previewNote }}</div>
+                  </div>
+                  <button onClick="{{ goUpload }}" style="margin-top: 12px; width: 100%; height: 46px; border-radius: 14px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 14px; font-weight: 600; color: #5c70ff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" style-hover="background: rgba(92,112,255,0.05); border-color: #b9c3ff;"><i data-lucide="upload-cloud" style="width: 16px; height: 16px; color: #5c70ff;"></i>Upload Bill</button>
+                </div>
+
+                <button onClick="{{ saveChanges }}" style="height: 52px; border: none; border-radius: 16px; background: #5c70ff; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: #4a5ff5;">Save Changes</button>
+                <div style="text-align: center; font-size: 12px; color: #6b7385; min-height: 16px;">{{ saveNote }}</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isUpload }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <sc-if value="{{ quickBill }}">
+                <div style="padding: 14px 16px; border-radius: 16px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="building-2" style="width: 18px; height: 18px; color: #5c70ff;"></i></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ biz.name }}</div>
+                    <div style="font-size: 12px; color: #6b7385;">You can link it to a transaction later</div>
+                  </div>
+                  <button onClick="{{ openBizSheet }}" style="height: 32px; padding: 0 12px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 12px; font-weight: 600; color: #5c70ff; cursor: pointer;" style-hover="background: rgba(92,112,255,0.05); border-color: #b9c3ff;">Change</button>
+                </div>
+                </sc-if>
+                <sc-if value="{{ txnBill }}">
+                <div style="padding: 14px 16px; border-radius: 16px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; gap: 8px; font-size: 13px;"><span style="color: #6b7385; flex: none;">Remarks:</span><span style="font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ txn.desc }}</span></div>
+                  <div style="display: flex; gap: 8px; font-size: 13px;"><span style="color: #6b7385;">Amount:</span><span style="font-weight: 600; color: #0f172a;">{{ txn.amountLabel }}</span></div>
+                </div>
+                </sc-if>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 13px; font-weight: 600; color: #0f172a;">Upload New Bill</div>
+                  <sc-if value="{{ uploadIdle }}">
+                    <div style="padding: 26px 20px; border-radius: 18px; border: 1.5px dashed #b9c3ff; background: rgba(92,112,255,0.04); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;">
+                      <i data-lucide="upload-cloud" style="width: 34px; height: 34px; color: #5c70ff;"></i>
+                      <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Add a photo or file</div>
+                      <div style="font-size: 12px; color: #6b7385;">PNG, JPG, GIF or PDF up to 10MB</div>
+                      <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <button onClick="{{ capture }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 12px; background: #5c70ff; color: #ffffff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;"><i data-lucide="camera" style="width: 15px; height: 15px; color: #ffffff;"></i>Take Photo</button>
+                        <button onClick="{{ capture }}" style="height: 40px; padding: 0 16px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; color: #0f172a; font-size: 13px; font-weight: 600; cursor: pointer;">Browse</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ uploaded }}">
+                    <div style="padding: 14px; border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 52px; height: 64px; border-radius: 10px; background: #f4f6fa; border: 1px solid #e7eaf3; display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="receipt-text" style="width: 22px; height: 22px; color: #5c70ff;"></i></div>
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a;">IMG_2026_0902.jpg</div>
+                        <div style="font-size: 12px; color: #6b7385; margin-top: 2px;">248 KB · ready to save</div>
+                      </div>
+                      <button onClick="{{ clearUpload }}" style="width: 30px; height: 30px; border-radius: 9px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i data-lucide="x" style="width: 15px; height: 15px; color: #9aa1b4;"></i></button>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <sc-if value="{{ txnBill }}"><div style="font-size: 13px; font-weight: 600; color: #0f172a;">Select from Existing Bills</div></sc-if>
+                  <sc-if value="{{ showNoExisting }}">
+                    <div style="padding: 30px 20px; border-radius: 18px; border: 1.5px dashed #e7eaf3; background: #ffffff; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                      <i data-lucide="image" style="width: 30px; height: 30px; color: #c9cfdd;"></i>
+                      <div style="font-size: 13px; color: #6b7385;">No existing bills found for this institution</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ showExisting }}">
+                    <div style="border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; overflow: hidden;">
+                      <sc-for list="{{ existingBills }}" as="b" hint-placeholder-count="3">
+                        <button onClick="{{ b.select }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; background: #ffffff; border: none; border-bottom: 1px solid #f0f2f7; cursor: pointer;" style-hover="background: #f8fafc;">
+                          <div style="width: 40px; height: 48px; border-radius: 8px; background: #f4f6fa; border: 1px solid #e7eaf3; display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="file-image" style="width: 18px; height: 18px; color: #5c70ff;"></i></div>
+                          <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ b.file }}</div>
+                            <div style="font-size: 12px; color: #6b7385; margin-top: 2px;">{{ b.meta }}</div>
+                          </div>
+                          <sc-if value="{{ b.selected }}"><i data-lucide="check-circle-2" style="width: 18px; height: 18px; color: #15803d; flex: none;"></i></sc-if>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <button onClick="{{ saveReceipt }}" style="height: 52px; border: none; border-radius: 16px; background: {{ saveBillBg }}; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer;">Save Bill</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isReceipts }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; padding: 4px; border-radius: 12px; background: #e9ecf5;">
+                  <sc-for list="{{ receiptTabs }}" as="tab" hint-placeholder-count="2">
+                    <button onClick="{{ tab.select }}" style="flex: 1; height: 36px; border: none; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; background: {{ tab.bg }}; color: {{ tab.color }}; box-shadow: {{ tab.shadow }};">{{ tab.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ noAccounts }}">
+                  <div style="text-align: center; padding: 40px 20px; font-size: 13px; color: #6b7385;">No bills yet. Upload transactions first, then attach bills here.</div>
+                </sc-if>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <sc-for list="{{ receiptList }}" as="t" hint-placeholder-count="4">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3;">
+                      <sc-if value="{{ t.isMissing }}">
+                        <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(220,38,38,0.08); display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="file-x" style="width: 20px; height: 20px; color: #dc2626;"></i></div>
+                      </sc-if>
+                      <sc-if value="{{ t.isAttached }}">
+                        <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(21,128,61,0.08); display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="file-check-2" style="width: 20px; height: 20px; color: #15803d;"></i></div>
+                      </sc-if>
+                      <button onClick="{{ t.open }}" style="flex: 1; min-width: 0; text-align: left; padding: 0; background: transparent; border: none; cursor: pointer;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ t.desc }}</div>
+                        <div style="font-size: 12px; color: #6b7385; margin-top: 2px;">{{ t.date }} · {{ t.amountLabel }}</div>
+                      </button>
+                      <sc-if value="{{ t.isMissing }}">
+                        <button onClick="{{ t.upload }}" style="flex: none; height: 36px; padding: 0 12px; border-radius: 10px; border: none; background: #5c70ff; color: #ffffff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;"><i data-lucide="upload-cloud" style="width: 14px; height: 14px; color: #ffffff;"></i>Upload</button>
+                      </sc-if>
+                      <sc-if value="{{ t.isAttached }}">
+                        <button onClick="{{ t.open }}" style="flex: none; width: 36px; height: 36px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i data-lucide="eye" style="width: 15px; height: 15px; color: #6b7385;"></i></button>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isCharts }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; padding: 4px; border-radius: 12px; background: #e9ecf5;">
+                  <sc-for list="{{ rangeChips }}" as="r" hint-placeholder-count="3">
+                    <button onClick="{{ r.select }}" style="flex: 1; height: 36px; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; background: {{ r.bg }}; color: {{ r.color }}; box-shadow: {{ r.shadow }};">{{ r.label }}</button>
+                  </sc-for>
+                </div>
+
+                <div style="padding: 18px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+                    <div>
+                      <div style="font-size: 12px; color: #6b7385;">Spending by category</div>
+                      <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -0.03em; color: #0f172a; margin-top: 4px;">{{ totals.spendLabel }}</div>
+                    </div>
+                    <div style="position: relative; width: 84px; height: 84px; flex: none;">
+                      <div style="position: absolute; inset: 0; border-radius: 999px; background: {{ donut }};"></div>
+                      <div style="position: absolute; inset: 14px; border-radius: 999px; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #0f172a;">{{ totals.categories }}</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; height: 10px; border-radius: 999px; overflow: hidden; margin-top: 16px; gap: 2px;">
+                    <sc-for list="{{ categoryBars }}" as="c" hint-placeholder-count="6">
+                      <div style="height: 100%; background: {{ c.color }}; width: {{ c.share }};"></div>
+                    </sc-for>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+                    <sc-for list="{{ categoryBars }}" as="c" hint-placeholder-count="6">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 10px; height: 10px; border-radius: 3px; background: {{ c.color }}; flex: none;"></span>
+                        <span style="flex: 1; font-size: 13px; font-weight: 500; color: #0f172a;">{{ c.label }}</span>
+                        <span style="font-size: 12px; color: #9aa1b4; width: 36px; text-align: right;">{{ c.share }}</span>
+                        <span style="font-size: 13px; font-weight: 600; color: #0f172a; width: 84px; text-align: right;">{{ c.value }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="padding: 18px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div>
+                      <div style="font-size: 12px; color: #6b7385;">Monthly spending</div>
+                      <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 24px; letter-spacing: -0.03em; color: #0f172a; margin-top: 4px;">{{ monthAvg }}<span style="font-size: 12px; font-weight: 500; color: #6b7385; margin-left: 6px;">avg / month</span></div>
+                    </div>
+                  </div>
+                  <div style="position: relative; height: 150px; margin-top: 18px;">
+                    <div style="position: absolute; left: 0; right: 0; top: 0; border-top: 1px dashed #e7eaf3;"></div>
+                    <div style="position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed #e7eaf3;"></div>
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid #e7eaf3;"></div>
+                    <div style="position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 12px; padding: 0 4px;">
+                      <sc-for list="{{ monthBars }}" as="m" hint-placeholder-count="6">
+                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;">
+                          <div style="flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                            <div style="font-size: 10px; font-weight: 600; color: {{ m.labelColor }}; height: 18px; line-height: 18px; flex: none;">{{ m.value }}</div>
+                            <div style="flex: 1; min-height: 0; width: 100%; display: flex; align-items: flex-end; justify-content: center;">
+                              <div style="width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; background: {{ m.color }}; height: {{ m.h }};"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 12px; padding: 8px 4px 0;">
+                    <sc-for list="{{ monthBars }}" as="m" hint-placeholder-count="6">
+                      <div style="flex: 1; text-align: center; font-size: 11px; font-weight: 500; color: {{ m.labelColor }};">{{ m.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isReports }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 18px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa1b4;">Date range</div>
+                  <button onClick="{{ openRangeSheet }}" style="width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 14px; border-radius: 14px; border: 1px solid #e7eaf3; background: #f8fafc; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #0f172a;"><i data-lucide="calendar" style="width: 16px; height: 16px; color: #5c70ff;"></i>{{ rangeDates }}</span>
+                    <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #6b7385;"></i>
+                  </button>
+                  <div style="display: flex; gap: 10px; margin-top: 14px;">
+                    <div style="flex: 1; padding: 12px; border-radius: 14px; background: #f8fafc;">
+                      <div style="font-size: 11px; color: #6b7385;">Transactions</div>
+                      <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 18px; color: #0f172a;">{{ totals.count }}</div>
+                    </div>
+                    <div style="flex: 1; padding: 12px; border-radius: 14px; background: #f8fafc;">
+                      <div style="font-size: 11px; color: #6b7385;">GST claimable</div>
+                      <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 18px; color: #0f172a;">{{ totals.gst }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <sc-for list="{{ reportActions }}" as="a" hint-placeholder-count="3">
+                    <button onClick="{{ a.run }}" style="display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; cursor: pointer;" style-hover="background: #f8fafc; border-color: #c9cfdd;">
+                      <div style="width: 40px; height: 40px; border-radius: 13px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; flex: none;">
+                        <i data-lucide="{{ a.icon }}" style="width: 18px; height: 18px; color: #5c70ff;"></i>
+                      </div>
+                      <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ a.label }}</div>
+                      </div>
+                      <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: #6b7385;"></i>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #5c70ff; font-weight: 600; min-height: 16px;">{{ reportNote }}</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isBusinesses }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <button onClick="{{ addBizFromList }}" style="height: 48px; border-radius: 16px; border: 1px dashed #b9c3ff; background: rgba(92,112,255,0.04); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; color: #5c70ff;" style-hover="background: rgba(92,112,255,0.08);"><i data-lucide="plus" style="width: 17px; height: 17px; color: #5c70ff;"></i>Add business</button>
+                <sc-for list="{{ businessCards }}" as="b" hint-placeholder-count="2">
+                  <div style="padding: 18px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; box-shadow: 0 1px 2px rgba(15,23,42,0.03);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 44px; height: 44px; border-radius: 14px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 16px; color: #5c70ff; flex: none;">{{ b.initials }}</div>
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 15px; font-weight: 600; color: #0f172a;">{{ b.name }}</div>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; background: rgba(21,128,61,0.08); font-size: 11px; font-weight: 600; color: #15803d;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #15803d;"></span>{{ b.status }}</div>
+                    </div>
+                    <sc-if value="{{ b.noAccounts }}">
+                      <button onClick="{{ connectBank }}" style="margin-top: 14px; width: 100%; height: 44px; border-radius: 14px; border: 1px dashed #c9cfdd; background: #ffffff; font-size: 13px; font-weight: 600; color: #5c70ff; cursor: pointer;">Connect a bank account</button>
+                    </sc-if>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+                      <sc-for list="{{ b.accounts }}" as="a" hint-placeholder-count="2">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #f8fafc;">
+                          <div style="width: 34px; height: 34px; border-radius: 10px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; align-items: center; justify-content: center; flex: none;">
+                            <i data-lucide="{{ a.icon }}" style="width: 16px; height: 16px; color: #5c70ff;"></i>
+                          </div>
+                          <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 13px; font-weight: 600; color: #0f172a;">{{ a.bank }}</div>
+                            <div style="font-size: 12px; color: #6b7385;">{{ a.masked }}</div>
+                          </div>
+                          <div style="font-size: 13px; font-weight: 600; color: #0f172a;">{{ a.balance }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isTeam }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <button onClick="{{ goInvite }}" style="height: 48px; border-radius: 16px; border: 1px dashed #b9c3ff; background: rgba(92,112,255,0.04); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; color: #5c70ff;" style-hover="background: rgba(92,112,255,0.08);"><i data-lucide="user-plus" style="width: 17px; height: 17px; color: #5c70ff;"></i>Add user</button>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <sc-for list="{{ teamList }}" as="m" hint-placeholder-count="3">
+                    <div style="border-radius: 18px; background: #ffffff; border: 1px solid #e7eaf3; overflow: hidden;">
+                      <button onClick="{{ m.toggle }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; background: #ffffff; border: none; cursor: pointer;" style-hover="background: #f8fafc;">
+                        <div style="width: 40px; height: 40px; border-radius: 13px; background: {{ m.avatarBg }}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: {{ m.avatarColor }}; flex: none;">{{ m.initials }}</div>
+                        <div style="flex: 1; min-width: 0;">
+                          <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 14px; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ m.name }}</span><span style="font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: {{ m.roleBg }}; color: {{ m.roleColor }}; flex: none;">{{ m.role }}</span></div>
+                          <div style="font-size: 12px; color: #6b7385; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ m.email }}</div>
+                          <div style="font-size: 12px; color: #9aa1b4; margin-top: 2px;">{{ m.accessLabel }}</div>
+                        </div>
+                        <i data-lucide="{{ m.chevron }}" style="width: 16px; height: 16px; color: #9aa1b4; flex: none;"></i>
+                      </button>
+                      <sc-if value="{{ m.open }}">
+                        <div style="border-top: 1px solid #e7eaf3; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; background: #fafbfe;">
+                          <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: #9aa1b4;">Business access</div>
+                          <sc-for list="{{ m.access }}" as="a" hint-placeholder-count="2">
+                            <button onClick="{{ a.toggle }}" style="display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; background: #ffffff; border: 1px solid #e7eaf3; cursor: pointer;">
+                              <span style="flex: 1; font-size: 13px; font-weight: 500; color: #0f172a;">{{ a.name }}</span>
+                              <span style="width: 40px; height: 24px; border-radius: 999px; background: {{ a.trackBg }}; position: relative; flex: none; transition: background 150ms;"><span style="position: absolute; top: 3px; left: {{ a.knobLeft }}; width: 18px; height: 18px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 3px rgba(15,23,42,0.2); transition: left 150ms;"></span></span>
+                            </button>
+                          </sc-for>
+                          <sc-if value="{{ m.canRemove }}">
+                            <button onClick="{{ m.remove }}" style="margin-top: 4px; height: 40px; border-radius: 12px; border: 1px solid rgba(220,38,38,0.25); background: #ffffff; font-size: 13px; font-weight: 600; color: #dc2626; cursor: pointer;" style-hover="background: rgba(220,38,38,0.05);">Remove user</button>
+                          </sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isInvite }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 14px;">
+                  <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Email <span style="color: #dc2626;">*</span></label><input type="email" value="{{ inviteEmail }}" onChange="{{ onInviteEmail }}" placeholder="name@company.com" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+                  <div style="display: flex; flex-direction: column; gap: 6px;"><label style="font-weight: 600; font-size: 12px; color: #0f172a;">Name</label><input value="{{ inviteName }}" onChange="{{ onInviteName }}" placeholder="Optional" style="width: 100%; height: 48px; border-radius: 12px; border: 1px solid #e7eaf3; background: #ffffff; padding: 0 14px; font-size: 14px; color: #0f172a;" /></div>
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-weight: 600; font-size: 12px; color: #0f172a;">Role</label>
+                    <div style="display: flex; padding: 4px; border-radius: 12px; background: #e9ecf5;">
+                      <sc-for list="{{ inviteRoles }}" as="r" hint-placeholder-count="2">
+                        <button onClick="{{ r.select }}" style="flex: 1; height: 36px; border: none; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; background: {{ r.bg }}; color: {{ r.color }}; box-shadow: {{ r.shadow }};">{{ r.label }}</button>
+                      </sc-for>
+                    </div>
+                    <div style="font-size: 12px; color: #9aa1b4;">{{ inviteRoleHint }}</div>
+                  </div>
+                </div>
+                <div style="padding: 16px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Business access</div>
+                  <sc-for list="{{ inviteAccess }}" as="a" hint-placeholder-count="2">
+                    <button onClick="{{ a.toggle }}" style="display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; background: #f8fafc; border: 1px solid #e7eaf3; cursor: pointer;">
+                      <span style="flex: 1; font-size: 13px; font-weight: 500; color: #0f172a;">{{ a.name }}</span>
+                      <span style="width: 40px; height: 24px; border-radius: 999px; background: {{ a.trackBg }}; position: relative; flex: none; transition: background 150ms;"><span style="position: absolute; top: 3px; left: {{ a.knobLeft }}; width: 18px; height: 18px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 3px rgba(15,23,42,0.2); transition: left 150ms;"></span></span>
+                    </button>
+                  </sc-for>
+                </div>
+                <button onClick="{{ sendInvite }}" style="height: 52px; border: none; border-radius: 16px; background: {{ inviteBg }}; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer;">Add user</button>
+                <div style="text-align: center; font-size: 12px; color: #9aa1b4;">They sign in with this email and see only the businesses selected above.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isMore }}">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3;">
+                  <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(92,112,255,0.08); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #5c70ff;">SK</div>
+                  <div>
+                    <div style="font-size: 15px; font-weight: 600; color: #0f172a;">Simran Kaur</div>
+                    <div style="font-size: 12px; color: #6b7385;">Owner</div>
+                  </div>
+                </div>
+                <div style="border-radius: 20px; background: #ffffff; border: 1px solid #e7eaf3; overflow: hidden;">
+                  <sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
+                    <button onClick="{{ m.run }}" style="display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 14px 16px; background: #ffffff; border: none; border-bottom: 1px solid #f0f2f7; cursor: pointer;" style-hover="background: #f8fafc;">
+                      <span style="width: 36px; height: 36px; border-radius: 11px; background: {{ m.chipBg }}; display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="{{ m.icon }}" style="width: 17px; height: 17px; color: {{ m.iconColor }};"></i></span>
+                      <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: {{ m.color }};">{{ m.label }}</div>
+                      </div>
+                      <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: #9aa1b4;"></i>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+
+          <div style="display: flex; align-items: stretch; padding: 8px 6px 26px; background: #ffffff; border-top: 1px solid #e7eaf3;">
+            <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="6">
+              <button onClick="{{ tab.go }}" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; background: transparent; border: none; cursor: pointer;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 10px; background: {{ tab.pillBg }};"><i data-lucide="{{ tab.icon }}" style="width: 21px; height: 21px; color: {{ tab.color }};"></i></span>
+                <span style="font-size: 10px; font-weight: {{ tab.weight }}; color: {{ tab.color }};">{{ tab.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ googleOpen }}">
+        <div onClick="{{ closeGoogle }}" style="position: absolute; inset: 0; background: rgba(15,23,42,0.35); z-index: 80; animation: fadeIn 160ms ease-out;"></div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 90; background: #ffffff; border-radius: 28px 28px 0 0; padding: 14px 18px 34px; box-shadow: 0 -20px 50px rgba(15,23,42,0.18); animation: sheetUp 220ms cubic-bezier(0.2,0.8,0.2,1);">
+          <div style="width: 44px; height: 4px; border-radius: 999px; background: #e7eaf3; margin: 0 auto 18px;"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;">
+            <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>
+            <div style="font-size: 16px; font-weight: 600; color: #0f172a; margin-top: 6px;">Choose an account</div>
+            <div style="font-size: 13px; color: #6b7385;">to continue to MediAccounts</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 18px;">
+            <sc-for list="{{ googleAccounts }}" as="g" hint-placeholder-count="2">
+              <button onClick="{{ g.select }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 16px; border: 1px solid #e7eaf3; background: #ffffff; cursor: pointer;" style-hover="background: #f4f6fa;">
+                <div style="width: 38px; height: 38px; border-radius: 999px; background: {{ g.color }}; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #ffffff; flex: none;">{{ g.initials }}</div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ g.name }}</div>
+                  <div style="font-size: 12px; color: #6b7385; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ g.email }}</div>
+                </div>
+              </button>
+            </sc-for>
+            <button onClick="{{ closeGoogle }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 16px; border: none; background: transparent; cursor: pointer;">
+              <div style="width: 38px; height: 38px; border-radius: 999px; border: 1px solid #e7eaf3; display: flex; align-items: center; justify-content: center; flex: none;"><i data-lucide="user-plus" style="width: 17px; height: 17px; color: #6b7385;"></i></div>
+              <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Use another account</div>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetOpen }}">
+        <div onClick="{{ closeSheet }}" style="position: absolute; inset: 0; background: rgba(15,23,42,0.35); z-index: 80; animation: fadeIn 160ms ease-out;"></div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 90; background: #ffffff; border-radius: 28px 28px 0 0; padding: 14px 18px 34px; box-shadow: 0 -20px 50px rgba(15,23,42,0.18); animation: sheetUp 220ms cubic-bezier(0.2,0.8,0.2,1);">
+          <div style="width: 44px; height: 4px; border-radius: 999px; background: #e7eaf3; margin: 0 auto 14px;"></div>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: -0.03em; color: #0f172a;">{{ sheetTitle }}</div>
+            <button onClick="{{ closeSheet }}" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid #e7eaf3; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <i data-lucide="x" style="width: 15px; height: 15px; color: #0f172a;"></i>
+            </button>
+          </div>
+          <div class="mx-scroll" style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px; max-height: 420px; overflow-y: auto;">
+            <sc-for list="{{ sheetOptions }}" as="o" hint-placeholder-count="3">
+              <button onClick="{{ o.select }}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid {{ o.border }}; background: {{ o.bg }};" style-hover="border-color: #b9c3ff;">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 14px; font-weight: 600; color: #0f172a;">{{ o.label }}</div>
+                  <sc-if value="{{ o.sub }}"><div style="font-size: 12px; color: #6b7385;">{{ o.sub }}</div></sc-if>
+                </div>
+                <sc-if value="{{ o.selected }}">
+                  <i data-lucide="check" style="width: 17px; height: 17px; color: #5c70ff;"></i>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ toast }}">
+        <div style="position: absolute; left: 18px; right: 18px; bottom: 108px; z-index: 95; padding: 14px 16px; border-radius: 16px; background: #0f172a; color: #ffffff; font-size: 13px; font-weight: 500; box-shadow: 0 18px 40px rgba(15,23,42,0.28); animation: fadeIn 160ms ease-out;">{{ toast }}</div>
+      </sc-if>
+
+    </div>
+  </x-import>
+
+  <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #6b7385;">
+    <button onClick="{{ reset }}" style="flex: none; white-space: nowrap; padding: 8px 14px; border-radius: 999px; border: 1px solid #e7eaf3; background: #ffffff; font-size: 13px; font-weight: 600; color: #5c70ff; cursor: pointer;">Restart at login</button>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 560, &quot;height&quot;: 1100}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'login', email: 'simran@westsideretail.ca', otp: ['', '', '', '', '', ''],
+    sheet: null, bizIdx: 0, acctIdx: 0, range: 'This month', search: '', cat: 'All',
+    txnId: 't1', memo: '', saveNote: '', resendNote: '', reportNote: '', toast: '',
+    receiptTab: 'Missing', uploaded: false, back: 'home', sending: false, emailError: false, googleOpen: false, hasBusiness: true, ownsNew: false, csvImported: false, pickedBill: null, newBizFrom: 'empty', expandedId: null, csvPicked: false, newBizName: '', newBizProv: 'BC', typeFor: 0, institutions: [{ name: '', type: 'Chequing Account', number: '', primary: true }],
+  };
+
+  ownedBusinesses = [];
+  get currentUser() { const em = (this.state.email || '').toLowerCase(); return this.team.find(m => m.email.toLowerCase() === em) || null; }
+  get isAdmin() { const u = this.currentUser; return !u || u.role === 'Admin'; }
+  get businesses() {
+    if (this.state.hasBusiness === false || this.state.ownsNew) return this.ownedBusinesses;
+    const u = this.currentUser;
+    if (u && u.role !== 'Admin') return this.allBusinesses.filter(b => u.access.includes(b.name));
+    return this.allBusinesses;
+  }
+  allBusinesses = [
+    { name: 'Westside Retail', legal: 'Westside Retail Ltd. · BC', status: 'Active', initials: 'WP', accounts: [
+      { bank: 'RBC Business Chequing', masked: '**** 5614', balance: '$48,210.55', icon: 'landmark', short: 'RBC **** 5614' },
+      { bank: 'Visa Business', masked: '**** 2288', balance: '$3,914.20', icon: 'credit-card', short: 'Visa **** 2288' } ] },
+    { name: 'Harbour Compounding', legal: 'Harbour Compounding Lab Inc. · BC', status: 'Active', initials: 'HC', accounts: [
+      { bank: 'TD Business Chequing', masked: '**** 9042', balance: '$21,760.10', icon: 'landmark', short: 'TD **** 9042' } ] },
+    { name: 'Nanaimo Corner Mart', legal: 'Nanaimo Corner Mart Ltd. · BC', status: 'Trial', initials: 'ND', accounts: [
+      { bank: 'Vancity Chequing', masked: '**** 3371', balance: '$9,482.75', icon: 'landmark', short: 'Vancity **** 3371' } ] },
+  ];
+
+  team = [
+    { name: 'Simran Kaur', email: 'simran@westsideretail.ca', role: 'Admin', access: null, status: 'active' },
+    { name: 'Daniel Chen', email: 'daniel.chen@outlook.com', role: 'Staff', access: ['Westside Retail'], status: 'active' },
+    { name: 'Priya Nair', email: 'priya.nair@gmail.com', role: 'Staff', access: ['Westside Retail', 'Harbour Compounding'], status: 'active' },
+    { name: 'Kavita Rao', email: 'kavita@ledgerworks.ca', role: 'Accountant', access: ['Westside Retail'], status: 'active' },
+  ];
+
+  txns = [
+    { id: 't1', date: 'Sep 2', fullDate: 'Tuesday, September 2, 2026', desc: 'Meridian Supply Canada', category: 'Inventory', amount: 4182.60, receipt: 'attached', gst: '$199.17', pst: '$0.00', memo: 'Weekly inventory restock — PO 44182', icon: 'package' },
+    { id: 't2', date: 'Sep 1', fullDate: 'Monday, September 1, 2026', desc: 'Northline Wholesale Supply', category: 'Supplies', amount: 318.44, receipt: 'missing', gst: '$15.16', pst: '$21.23', memo: '', icon: 'shopping-bag' },
+    { id: 't3', date: 'Aug 31', fullDate: 'Sunday, August 31, 2026', desc: 'BC Hydro', category: 'Utilities', amount: 412.19, receipt: 'attached', gst: '$19.63', pst: '$0.00', memo: 'Store 1 — Aug billing', icon: 'zap' },
+    { id: 't4', date: 'Aug 30', fullDate: 'Saturday, August 30, 2026', desc: 'Telus Business', category: 'Telecom', amount: 164.85, receipt: 'missing', gst: '$7.85', pst: '$11.54', memo: '', icon: 'smartphone' },
+    { id: 't5', date: 'Aug 29', fullDate: 'Friday, August 29, 2026', desc: 'Uline Packaging', category: 'Supplies', amount: 256.30, receipt: 'attached', gst: '$12.20', pst: '$17.94', memo: 'Delivery bags and labels', icon: 'box' },
+    { id: 't6', date: 'Aug 28', fullDate: 'Thursday, August 28, 2026', desc: 'Payroll — Aug period B', category: 'Payroll', amount: 12940.00, receipt: 'attached', gst: '$0.00', pst: '$0.00', memo: '9 staff, 2 managers', icon: 'users' },
+    { id: 't7', date: 'Aug 27', fullDate: 'Wednesday, August 27, 2026', desc: 'Coastal Marketing Co-op', category: 'Marketing', amount: 540.00, receipt: 'missing', gst: '$25.71', pst: '$0.00', memo: '', icon: 'megaphone' },
+    { id: 't8', date: 'Aug 26', fullDate: 'Tuesday, August 26, 2026', desc: 'Vancity Lease Payment', category: 'Rent', amount: 3850.00, receipt: 'attached', gst: '$183.33', pst: '$0.00', memo: 'Unit 104 — Broadway', icon: 'building-2' },
+    { id: 't9', date: 'Aug 25', fullDate: 'Monday, August 25, 2026', desc: 'Purolator', category: 'Shipping', amount: 88.12, receipt: 'attached', gst: '$4.20', pst: '$0.00', memo: '', icon: 'truck' },
+    { id: 't10', date: 'Aug 24', fullDate: 'Sunday, August 24, 2026', desc: 'Staples Business', category: 'Supplies', amount: 142.77, receipt: 'missing', gst: '$6.80', pst: '$9.51', memo: '', icon: 'printer' },
+  ];
+
+  ranges = [
+    { label: 'This month', sub: 'Aug 1 – Sep 2, 2026', dates: 'Aug 1 – Sep 2, 2026' },
+    { label: 'Last month', sub: 'Jul 1 – Jul 31, 2026', dates: 'Jul 1 – Jul 31, 2026' },
+    { label: 'This quarter', sub: 'Jul 1 – Sep 2, 2026', dates: 'Jul 1 – Sep 2, 2026' },
+    { label: 'Year to date', sub: 'Jan 1 – Sep 2, 2026', dates: 'Jan 1 – Sep 2, 2026' },
+  ];
+
+  tints = {
+    Inventory: ['#f1f3ff', '#dfe4ff', '#5c70ff'],
+    Supplies: ['#fff7ee', '#ffe6c7', '#e0862a'],
+    Utilities: ['#eefaf3', '#cfeedd', '#15803d'],
+    Telecom: ['#f3efff', '#e2d9ff', '#7c5cff'],
+    Payroll: ['#eef6ff', '#cfe3ff', '#2f6fdb'],
+    Marketing: ['#fff0f4', '#ffd6e1', '#d43f6a'],
+    Rent: ['#f4f4f0', '#e2e2d6', '#6b6b4e'],
+    Shipping: ['#eefafb', '#cdeff1', '#0e8a94'],
+    _: ['#fafbfd', '#e7eaf3', '#9aa1b4'],
+  };
+  categories = ['Inventory', 'Payroll', 'Rent', 'Supplies', 'Utilities', 'Telecom', 'Marketing', 'Shipping'];
+
+  componentDidMount() { this.txns.forEach(t => { t.gstOn = t.gst !== '$0.00'; t.pstOn = t.pst !== '$0.00'; }); this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  icons() { if (window.lucide) window.lucide.createIcons(); else setTimeout(() => window.lucide && window.lucide.createIcons(), 400); }
+
+  money(n) { return '$' + n.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  set(patch) { this.setState(patch); }
+  updIns(i, patch) { this.setState(st => ({ institutions: st.institutions.map((x, j) => j === i ? Object.assign({}, x, patch) : x) })); }
+  flash(msg) { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  nav(screen) { this.setState({ screen, saveNote: '', reportNote: '' }); }
+
+  decorate(t) {
+    const missing = t.receipt === 'missing';
+    return Object.assign({}, t, {
+      amountLabel: '-' + this.money(t.amount),
+      meta: t.date + ' · ' + t.category,
+      receiptLabel: missing ? 'Bill missing' : 'Bill attached',
+      receiptColor: missing ? '#dc2626' : '#15803d',
+      receiptIcon: missing ? 'file-warning' : 'file-check',
+      receiptBg: missing ? 'rgba(220,38,38,0.10)' : 'rgba(92,112,255,0.08)',
+      previewIcon: missing ? 'file-plus' : 'receipt-text',
+      previewNote: missing ? 'No receipt on file yet' : 'IMG_' + t.id.toUpperCase() + '.jpg · 248 KB',
+      open: () => this.setState({ screen: 'details', txnId: t.id, memo: t.memo, gstEdit: null, pstEdit: null, back: 'transactions', saveNote: '', uploaded: t.receipt !== 'missing' }),
+      pickCat: () => this.setState({ sheet: 'cat', txnId: t.id }),
+      isMissing: missing, isAttached: !missing,
+      expanded: this.state.expandedId === t.id, chevRot: this.state.expandedId === t.id ? '180deg' : '0deg',
+      toggle: () => this.setState({ expandedId: this.state.expandedId === t.id ? null : t.id }),
+      openLink: e => { e && e.preventDefault(); this.setState({ screen: 'details', txnId: t.id, memo: t.memo, back: 'transactions', saveNote: '', uploaded: t.receipt !== 'missing' }); },
+      tintBg: (this.tints[t.category] || this.tints._)[0], tintBorder: (this.tints[t.category] || this.tints._)[1], tintAccent: (this.tints[t.category] || this.tints._)[2],
+      gstVal: t.gst === '$0.00' ? '' : t.gst.replace(/[$,]/g, ''),
+      pstVal: t.pst === '$0.00' ? '' : t.pst.replace(/[$,]/g, ''),
+      onGst: e => { const v = e.target.value.replace(/[^0-9.]/g, ''); t.gstOn = false; t.gst = v ? '$' + v : '$0.00'; this.forceUpdate(); },
+      onPst: e => { const v = e.target.value.replace(/[^0-9.]/g, ''); t.pstOn = false; t.pst = v ? '$' + v : '$0.00'; this.forceUpdate(); },
+      toggleGst: () => { t.gstOn = !t.gstOn; t.gst = t.gstOn ? this.money(t.amount * 0.05 / 1.12) : '$0.00'; this.forceUpdate(); },
+      gstBorder: t.gstOn ? '#5c70ff' : '#e7eaf3', gstBg: t.gstOn ? '#5c70ff' : '#eef0f6', gstColor: t.gstOn ? '#ffffff' : '#6b7385',
+      onMemo: e => { t.memo = e.target.value; this.forceUpdate(); },
+      upload: () => this.setState({ screen: 'upload', txnId: t.id, memo: t.memo, back: 'transactions', uploaded: false, pickedBill: null, quickBill: false }),
+      upBorder: '#b9c3ff', upBg: 'rgba(92,112,255,0.06)', upIcon: 'upload-cloud', upColor: '#5c70ff',
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const biz = this.businesses[s.bizIdx] || { name: '', legal: '', status: '', initials: '', accounts: [] };
+    const acct = biz.accounts[Math.min(s.acctIdx, biz.accounts.length - 1)] || { bank: 'No account', masked: '', balance: '', icon: 'landmark', short: 'Connect account' };
+    const noAccounts = biz.accounts.length === 0;
+    const src = (noAccounts || (biz.isNew && !biz.imported)) ? [] : this.txns;
+    const all = src.map(t => this.decorate(t));
+    const txn = all.find(t => t.id === s.txnId) || all[0] || this.decorate(this.txns[0]);
+    const q = s.search.toLowerCase();
+    const filtered = all.filter(t => (s.cat === 'All' || t.category === s.cat) &&
+      (!q || t.desc.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)));
+    const total = src.reduce((a, t) => a + t.amount, 0);
+    const missingCount = src.filter(t => t.receipt === 'missing').length;
+    const rangeObj = this.ranges.find(r => r.label === s.range) || this.ranges[0];
+
+    const titles = {
+      home: ['Home', ''],
+      transactions: ['Transactions', biz.name + ' · ' + s.range],
+      details: ['Transaction details', txn.date + ' · ' + txn.category],
+      upload: ['Upload Bill', s.quickBill ? biz.name : txn.desc],
+      csv: ['Upload CSV', acct.short + ' · ' + biz.name],
+      receipts: ['Bills', missingCount + ' missing of ' + src.length],
+      charts: ['Charts', biz.name + ' · ' + s.range],
+      reports: ['Reports', biz.name + ' · ' + s.range],
+      businesses: ['Businesses', this.businesses.length + ' businesses linked'],
+      more: ['More', 'Settings and access'],
+      team: ['Team', this.team.length + ' users'],
+      invite: ['Add user', 'They get access right away'],
+    };
+    const t = titles[s.screen] || titles.home;
+
+    const catTotals = {};
+    src.forEach(x => { catTotals[x.category] = (catTotals[x.category] || 0) + x.amount; });
+    const catList = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]).slice(0, 6);
+    const maxCat = catTotals[catList[0]] || 1;
+    const months = noAccounts ? [['Apr', 0], ['May', 0], ['Jun', 0], ['Jul', 0], ['Aug', 0], ['Sep', 0]] : [['Apr', 18240], ['May', 19680], ['Jun', 21130], ['Jul', 20420], ['Aug', 22750], ['Sep', 4182]];
+    const maxMonth = 22750;
+
+    const sheetTitles = { biz: 'Select business', acct: 'Select bank account', range: 'Date range', cat: 'Category', prov: 'Province', type: 'Account type' };
+    let sheetOptions = [];
+    if (s.sheet === 'biz') sheetOptions = this.businesses.map((b, i) => ({
+      label: b.name, sub: b.legal, selected: i === s.bizIdx,
+      border: i === s.bizIdx ? '#5c70ff' : '#e7eaf3', bg: i === s.bizIdx ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => this.setState({ bizIdx: i, acctIdx: 0, sheet: null }),
+    })).concat([{ label: '+ Add business', sub: 'Create another business', selected: false, border: '#b9c3ff', bg: 'rgba(92,112,255,0.04)',
+      select: () => this.setState({ sheet: null, screen: 'newbiz', newBizFrom: s.screen }) }]);
+    if (s.sheet === 'acct') sheetOptions = biz.accounts.map((a, i) => ({
+      label: a.bank, sub: a.masked + ' · ' + a.balance, selected: i === s.acctIdx,
+      border: i === s.acctIdx ? '#5c70ff' : '#e7eaf3', bg: i === s.acctIdx ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => this.setState({ acctIdx: i, sheet: null }),
+    }));
+    if (s.sheet === 'range') sheetOptions = this.ranges.map(r => ({
+      label: r.label, sub: r.sub, selected: r.label === s.range,
+      border: r.label === s.range ? '#5c70ff' : '#e7eaf3', bg: r.label === s.range ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => this.setState({ range: r.label, sheet: null }),
+    }));
+    if (s.sheet === 'type') { const cur = (s.institutions[s.typeFor] || {}).type; sheetOptions = ['Savings Account', 'Chequing Account', 'Credit Card', 'Debit Card', 'Joint Account', 'Business Account'].map(t => ({
+      label: t, sub: '', selected: t === cur,
+      border: t === cur ? '#5c70ff' : '#e7eaf3', bg: t === cur ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => { this.updIns(s.typeFor, { type: t }); this.set({ sheet: null }); },
+    })); }
+    if (s.sheet === 'prov') sheetOptions = [['AB', 'Alberta'], ['BC', 'British Columbia'], ['MB', 'Manitoba'], ['NB', 'New Brunswick'], ['NL', 'Newfoundland and Labrador'], ['NS', 'Nova Scotia'], ['NT', 'Northwest Territories'], ['NU', 'Nunavut'], ['ON', 'Ontario'], ['PE', 'Prince Edward Island'], ['QC', 'Quebec'], ['SK', 'Saskatchewan'], ['YT', 'Yukon']].map(p => ({
+      label: p[1], sub: p[0], selected: p[0] === s.newBizProv,
+      border: p[0] === s.newBizProv ? '#5c70ff' : '#e7eaf3', bg: p[0] === s.newBizProv ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => this.setState({ newBizProv: p[0], sheet: null }),
+    }));
+    if (s.sheet === 'cat') sheetOptions = this.categories.map(c => ({
+      label: c, sub: this.money(catTotals[c] || 0) + ' this month', selected: c === txn.category,
+      border: c === txn.category ? '#5c70ff' : '#e7eaf3', bg: c === txn.category ? 'rgba(92,112,255,0.05)' : '#ffffff',
+      select: () => { const raw = this.txns.find(x => x.id === txn.id); raw.category = c; this.setState({ sheet: null }); },
+    }));
+
+    const receiptList = all.filter(x => (s.receiptTab === 'Missing') === (x.receipt === 'missing'));
+
+    return {
+      email: s.email, range: s.range, rangeDates: rangeObj.dates, search: s.search, memo: s.memo,
+      saveNote: s.saveNote, resendNote: s.resendNote, reportNote: s.reportNote, toast: s.toast,
+      isLogin: s.screen === 'login', isOtp: s.screen === 'otp',
+      isApp: !['login', 'otp', 'empty', 'newbiz'].includes(s.screen),
+      isEmpty: s.screen === 'empty', isNewBiz: s.screen === 'newbiz',
+      isHome: s.screen === 'home', isTransactions: s.screen === 'transactions',
+      isDetails: s.screen === 'details', isUpload: s.screen === 'upload', isCsv: s.screen === 'csv',
+      isReceipts: s.screen === 'receipts', isCharts: s.screen === 'charts',
+      isReports: s.screen === 'reports', isBusinesses: s.screen === 'businesses', isMore: s.screen === 'more',
+      isTeam: s.screen === 'team', isInvite: s.screen === 'invite',
+      screenTitle: t[0], screenSub: t[1],
+      showBack: ['details', 'upload', 'businesses', 'csv', 'charts', 'reports', 'team', 'invite'].includes(s.screen),
+      scrollPad: ['details', 'upload', 'businesses', 'csv', 'charts', 'reports', 'team', 'invite'].includes(s.screen) ? '16px 16px 24px' : '64px 16px 24px',
+      back: () => this.nav(s.screen === 'invite' ? 'team' : ['charts', 'reports', 'team'].includes(s.screen) ? 'more' : s.screen === 'upload' ? (s.quickBill ? 'home' : 'details') : s.screen === 'businesses' ? 'more' : s.screen === 'csv' ? s.back : s.back),
+      biz, acct, txn, filtered, filteredCount: filtered.length,
+      noAccounts, hasTxns: src.length > 0, noTxnsYet: !noAccounts && src.length === 0,
+      connectBank: () => this.flash('Bank connection opens your bank\'s secure login'),
+      goCsvLink: e => { e && e.preventDefault(); this.setState({ screen: 'csv', back: 'transactions', csvPicked: false }); },
+      exportCsvLink: e => { e && e.preventDefault(); this.flash('mediaccounts-' + biz.name.toLowerCase().replace(/\s+/g, '-') + '.csv exported'); },
+      goCharts: () => this.nav('charts'),
+      goCsv: () => this.setState({ screen: 'csv', back: ['home', 'transactions'].includes(s.screen) ? s.screen : 'home', csvPicked: false }),
+      csvIdle: !s.csvPicked, csvReady: s.csvPicked, csvCount: this.txns.length,
+      csvPreview: this.txns.slice(0, 4).map(t => this.decorate(t)),
+      pickCsv: () => this.set({ csvPicked: true }),
+      clearCsv: () => this.set({ csvPicked: false }),
+      importCsv: () => { biz.imported = true; this.setState({ csvImported: true, csvPicked: false, screen: 'transactions' }); this.flash(this.txns.length + ' transactions imported'); },
+      exportCsv: () => this.flash('mediaccounts-' + biz.name.toLowerCase().replace(/\s+/g, '-') + '.csv exported'),
+      quickActions: [
+        { label: 'Upload CSV', icon: 'file-up', run: () => this.setState({ screen: 'csv', back: 'home', csvPicked: false }) },
+        { label: 'Export CSV', icon: 'file-down', run: () => this.flash('mediaccounts-' + biz.name.toLowerCase().replace(/\s+/g, '-') + '.csv exported') },
+      ],
+      recent: all.slice(0, 4),
+      totals: {
+        spendLabel: this.money(total), delta: '+6.4%', categories: Object.keys(catTotals).length,
+        missing: missingCount, count: src.length,
+        gst: this.money(src.reduce((a, x) => a + parseFloat(x.gst.replace(/[$,]/g, '')), 0)),
+      },
+      onEmail: e => this.set({ email: e.target.value, emailError: false }),
+      onSearch: e => this.set({ search: e.target.value }),
+      onMemo: e => this.set({ memo: e.target.value }),
+      otpBoxes: s.otp.map((v, i) => ({ value: v, onChange: e => {
+        const d = e.target.value.replace(/\D/g, '').slice(-1);
+        const next = s.otp.slice(); next[i] = d; this.setState({ otp: next });
+      } })),
+      goLogin: e => { e && e.preventDefault(); this.nav('login'); },
+      googleOpen: s.googleOpen,
+      openGoogle: () => this.set({ googleOpen: true }),
+      closeGoogle: () => this.set({ googleOpen: false }),
+      googleAccounts: [
+        { name: 'Simran Kaur', email: 'simran@westsideretail.ca', initials: 'SK', color: '#5c70ff', hasBusiness: true },
+        { name: 'Daniel Chen', email: 'daniel.chen@outlook.com', initials: 'DC', color: '#15803d', hasBusiness: true },
+        { name: 'Simran Kaur', email: 'simran.kaur@gmail.com', initials: 'S', color: '#0f172a', hasBusiness: false },
+      ].map(g => Object.assign({}, g, { select: () => { this.ownedBusinesses = []; this.setState({ googleOpen: false, email: g.email, hasBusiness: g.hasBusiness, ownsNew: false, csvImported: false, pickedBill: null, newBizFrom: 'empty', expandedId: null, bizIdx: 0, acctIdx: 0, screen: g.hasBusiness ? 'home' : 'empty' }); } })),
+      sending: s.sending, emailError: s.emailError,
+      emailBorder: s.emailError ? '#dc2626' : '#e7eaf3',
+      sendLabel: s.sending ? 'Signing in…' : 'Continue with Email',
+      signInLabel: s.sending ? 'Signing in…' : 'Sign In',
+      password: s.password || '', onPassword: e => this.set({ password: e.target.value }),
+      pwType: s.showPw ? 'text' : 'password', pwIcon: s.showPw ? 'eye-off' : 'eye', togglePw: () => this.set({ showPw: !s.showPw }),
+      stayBorder: s.stay === false ? '#c9cfdd' : '#5c70ff', stayBg: s.stay === false ? '#ffffff' : '#5c70ff', toggleStay: () => this.set({ stay: s.stay === false }),
+      sendLink: () => {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) { this.setState({ emailError: true }); return; }
+        this.setState({ sending: true, emailError: false });
+        clearTimeout(this._send);
+        this._send = setTimeout(() => this.setState({ sending: false, screen: 'otp', otp: ['4', '1', '9', '', '', ''], resendNote: 'Expires in 10 min' }), 900);
+      },
+      goHome: () => this.nav('home'),
+      logout: () => this.setState({ screen: 'login' }),
+      goEmpty: () => this.nav('empty'),
+      goNewBiz: () => this.setState({ screen: 'newbiz', newBizFrom: 'empty' }),
+      addBizFromList: () => this.setState({ screen: 'newbiz', newBizFrom: 'businesses' }),
+      cancelNewBiz: () => this.nav(s.newBizFrom === 'empty' ? 'empty' : s.newBizFrom),
+      emptyPerks: [{ n: '1', label: 'Add your business and bank account' }, { n: '2', label: 'Upload your bank statement (CSV)' }, { n: '3', label: 'Attach bills to transactions' }],
+      newBizName: s.newBizName,
+      onNewBizName: e => this.set({ newBizName: e.target.value }),
+      newBizProv: s.newBizProv,
+      onNewBizProv: e => this.set({ newBizProv: e.target.value.toUpperCase().slice(0, 2) }),
+      institutions: s.institutions.map((ins, i) => ({
+        n: i + 1, name: ins.name, number: ins.number, removable: s.institutions.length > 1,
+        onName: e => this.updIns(i, { name: e.target.value }),
+        onNumber: e => this.updIns(i, { number: e.target.value.replace(/\D/g, '') }),
+        remove: () => this.setState({ institutions: s.institutions.filter((_, j) => j !== i) }),
+        setPrimary: () => this.setState({ institutions: s.institutions.map((x, j) => Object.assign({}, x, { primary: j === i })) }),
+        radioBorder: ins.primary ? '#5c70ff' : '#c9cfdd', radioFill: ins.primary ? '#5c70ff' : 'transparent',
+        type: ins.type, openType: () => this.set({ sheet: 'type', typeFor: i }),
+      })),
+      addInstitution: () => this.setState({ institutions: s.institutions.concat([{ name: '', type: 'Chequing Account', number: '', primary: false }]) }),
+      createBg: (s.newBizName.trim() && s.institutions.every(x => x.name.trim() && x.number.trim())) ? '#5c70ff' : '#c3cbff',
+      createBiz: () => {
+        const name = s.newBizName.trim();
+        if (!name || !s.institutions.every(x => x.name.trim() && x.number.trim())) return;
+        const accounts = s.institutions.slice().sort((a, b) => (b.primary ? 1 : 0) - (a.primary ? 1 : 0)).map(x => ({
+          bank: x.name.trim() + ' ' + x.type, masked: '**** ' + x.number.slice(-4), balance: '$0.00',
+          icon: /card/i.test(x.type) ? 'credit-card' : 'landmark', short: x.name.trim() + ' **** ' + x.number.slice(-4),
+        }));
+        const target = (s.hasBusiness === false || s.ownsNew) ? this.ownedBusinesses : this.allBusinesses;
+        target.unshift({ isNew: true, imported: false, name, legal: name + ' · ' + s.newBizProv, status: 'New', initials: name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), accounts });
+        this.setState({ bizIdx: 0, acctIdx: 0, hasBusiness: true, ownsNew: target === this.ownedBusinesses, screen: 'home', institutions: [{ name: '', type: 'Chequing Account', number: '', primary: true }], newBizName: '' });
+        this.flash(name + ' created');
+      },
+      noop: e => { e && e.preventDefault(); },
+      resendOtp: e => { e && e.preventDefault(); this.setState({ otp: ['', '', '', '', '', ''], resendNote: 'New code sent' }); },
+      verifyOtp: () => { this.ownedBusinesses = []; const known = !!this.currentUser; this.setState({ screen: known ? 'home' : 'empty', hasBusiness: known, ownsNew: false, csvImported: false, bizIdx: 0, acctIdx: 0, resendNote: '' }); },
+      verifyBg: s.otp.every(d => d) ? '#5c70ff' : '#aab4ff',
+      codeLabel: s.sending ? 'Sending…' : 'Send code',
+      emailOk: !s.emailError,
+      reset: () => this.setState({ screen: 'login', otp: ['', '', '', '', '', ''], sheet: null, toast: '' }),
+      goTransactions: e => { e && e.preventDefault(); this.nav('transactions'); },
+      goReceipts: () => this.nav('receipts'),
+      goUpload: () => this.setState({ screen: 'upload', uploaded: false, pickedBill: null, quickBill: false }),
+      goQuickUpload: () => this.setState({ screen: 'upload', uploaded: false, pickedBill: null, quickBill: true }),
+      quickBill: !!s.quickBill, txnBill: !s.quickBill,
+      gstEdit: s.gstEdit != null ? s.gstEdit : String(txn.gst || '').replace(/[$,]/g, ''),
+      pstEdit: s.pstEdit != null ? s.pstEdit : String(txn.pst || '').replace(/[$,]/g, ''),
+      onGstEdit: e => this.set({ gstEdit: e.target.value.replace(/[^0-9.]/g, '') }),
+      onPstEdit: e => this.set({ pstEdit: e.target.value.replace(/[^0-9.]/g, '') }),
+      autoGst: () => this.set({ gstEdit: (txn.amount * 0.05 / 1.12).toFixed(2) }),
+      autoPst: () => this.set({ pstEdit: (txn.amount * 0.07 / 1.12).toFixed(2) }),
+      saveChanges: () => { const raw = this.txns.find(x => x.id === txn.id); const num = v => parseFloat(String(v || '').replace(/[$,]/g, '')) || 0;
+        raw.memo = s.memo;
+        const g = s.gstEdit != null ? num(s.gstEdit) : num(raw.gst); const p = s.pstEdit != null ? num(s.pstEdit) : num(raw.pst);
+        raw.gst = this.money(g); raw.pst = this.money(p); raw.gstOn = g > 0;
+        this.setState({ saveNote: '', gstEdit: null, pstEdit: null }); this.flash('Saved'); },
+      capture: () => this.setState({ uploaded: true, pickedBill: null }),
+      clearUpload: () => this.setState({ uploaded: false }),
+      uploadIdle: !s.uploaded, uploaded: s.uploaded,
+      existingBills: ((biz.isNew && !biz.imported) ? [] : this.txns.filter(x => x.receipt !== 'missing' && x.id !== txn.id).slice(0, 3)).map(x => ({
+        file: 'IMG_' + x.id.toUpperCase() + '.jpg', meta: x.date + ' · ' + this.money(x.amount) + ' · ' + x.desc,
+        selected: s.pickedBill === x.id, select: () => this.setState({ pickedBill: s.pickedBill === x.id ? null : x.id, uploaded: false }),
+      })),
+      noExistingBills: ((biz.isNew && !biz.imported) ? [] : this.txns.filter(x => x.receipt !== 'missing' && x.id !== txn.id)).length === 0,
+      hasExistingBills: ((biz.isNew && !biz.imported) ? [] : this.txns.filter(x => x.receipt !== 'missing' && x.id !== txn.id)).length > 0,
+      showExisting: !s.quickBill && ((biz.isNew && !biz.imported) ? [] : this.txns.filter(x => x.receipt !== 'missing' && x.id !== txn.id)).length > 0,
+      showNoExisting: !s.quickBill && ((biz.isNew && !biz.imported) ? [] : this.txns.filter(x => x.receipt !== 'missing' && x.id !== txn.id)).length === 0,
+      saveBillBg: (s.uploaded || s.pickedBill) ? '#5c70ff' : '#c3cbff',
+      saveReceipt: () => { if (!s.uploaded && !s.pickedBill) return; if (s.quickBill) { this.setState({ screen: 'home', uploaded: false, quickBill: false }); this.flash('Bill saved to ' + biz.name); return; } const raw = this.txns.find(x => x.id === txn.id); raw.receipt = 'attached'; this.setState({ screen: 'details' }); this.flash('Bill attached to ' + txn.desc); },
+      catChips: ['All'].concat(this.categories).map(c => ({
+        label: c, select: () => this.set({ cat: c }),
+        border: c === s.cat ? '#0f172a' : '#e7eaf3',
+        bg: c === s.cat ? '#0f172a' : '#ffffff',
+        color: c === s.cat ? '#ffffff' : '#6b7385',
+      })),
+      receiptTabs: ['Missing', 'Attached'].map(x => ({
+        label: x + ' (' + (x === 'Missing' ? missingCount : src.length - missingCount) + ')',
+        select: () => this.set({ receiptTab: x }),
+        bg: x === s.receiptTab ? '#ffffff' : 'transparent',
+        color: x === s.receiptTab ? '#0f172a' : '#6b7385',
+        shadow: x === s.receiptTab ? '0 1px 3px rgba(15,23,42,0.10)' : 'none',
+      })),
+      receiptList,
+      rangeChips: ['This month', 'This quarter', 'Year to date'].map(r => ({
+        label: r, select: () => this.set({ range: r }),
+        bg: r === s.range ? '#ffffff' : 'transparent',
+        color: r === s.range ? '#0f172a' : '#6b7385',
+        shadow: r === s.range ? '0 1px 3px rgba(15,23,42,0.10)' : 'none',
+      })),
+      donut: (() => { let acc = 0; const segs = catList.map((c, i) => { const p = total ? (catTotals[c] / total) * 100 : 0; const col = (this.tints[c] || this.tints._)[2]; const seg = col + ' ' + acc.toFixed(1) + '% ' + (acc + p).toFixed(1) + '%'; acc += p; return seg; }); segs.push('#e7eaf3 ' + acc.toFixed(1) + '% 100%'); return 'conic-gradient(' + segs.join(', ') + ')'; })(),
+      monthAvg: this.money(months.reduce((a, m) => a + m[1], 0) / months.length),
+      categoryBars: catList.map((c, i) => ({
+        label: c, value: this.money(catTotals[c]),
+        pct: Math.round((catTotals[c] / maxCat) * 100) + '%',
+        share: (total ? Math.round((catTotals[c] / total) * 100) : 0) + '%',
+        color: (this.tints[c] || this.tints._)[2],
+      })),
+      monthBars: months.map(m => ({
+        label: m[0], value: '$' + Math.round(m[1] / 1000) + 'k',
+        h: Math.max(2, Math.round((m[1] / maxMonth) * 100)) + '%',
+        color: m[0] === 'Sep' ? '#d3d9ff' : '#5c70ff', labelColor: m[0] === 'Sep' ? '#9aa1b4' : '#0f172a',
+      })),
+      reportActions: [
+        { label: 'Export CSV', sub: 'For your accountant or spreadsheet', icon: 'file-spreadsheet', run: () => { this.setState({ reportNote: 'mediaccounts-aug-2026.csv exported' }); this.flash('CSV exported'); } },
+        { label: 'Download PDF', sub: 'Spending summary with GST and PST', icon: 'file-text', run: () => { this.setState({ reportNote: 'PDF ready in Downloads' }); this.flash('PDF downloaded'); } },
+        { label: 'Share Report', sub: 'Email or message the PDF', icon: 'share-2', run: () => { this.setState({ reportNote: 'Shared with kavita@ledgerworks.ca' }); this.flash('Report shared'); } },
+      ],
+      teamList: this.team.map((m, i) => {
+        const isAdmin = m.role === 'Admin'; const open = s.teamOpen === i;
+        const names = this.businesses.map(b => b.name);
+        return {
+          name: m.name, email: m.email, role: m.role, initials: m.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+          avatarBg: isAdmin ? '#5c70ff' : 'rgba(92,112,255,0.08)', avatarColor: isAdmin ? '#ffffff' : '#5c70ff',
+          roleBg: m.status === 'invited' ? 'rgba(217,119,6,0.10)' : isAdmin ? 'rgba(92,112,255,0.10)' : '#eef0f6', roleColor: m.status === 'invited' ? '#b45309' : isAdmin ? '#5c70ff' : '#6b7385',
+          accessLabel: isAdmin ? 'All businesses' : (m.access.length === 0 ? 'No access yet' : m.access.length === names.length ? 'All businesses' : m.access.join(', ')),
+          open: open && !isAdmin, chevron: isAdmin ? 'shield-check' : open ? 'chevron-up' : 'chevron-down', canRemove: !isAdmin,
+          toggle: () => { if (!isAdmin) this.set({ teamOpen: open ? null : i }); },
+          remove: () => { this.team.splice(i, 1); this.setState({ teamOpen: null }); this.flash(m.name + ' removed'); },
+          access: names.map(n => { const on = isAdmin || m.access.includes(n); return { name: n, trackBg: on ? '#5c70ff' : '#d5d9e4', knobLeft: on ? '19px' : '3px',
+            toggle: () => { if (isAdmin) return; m.access = on ? m.access.filter(x => x !== n) : m.access.concat([n]); this.forceUpdate(); } }; }),
+        };
+      }),
+      inviteEmail: s.inviteEmail || '', inviteName: s.inviteName || '',
+      onInviteEmail: e => this.set({ inviteEmail: e.target.value }), onInviteName: e => this.set({ inviteName: e.target.value }),
+      inviteRoles: ['Staff', 'Accountant'].map(r => { const on = (s.inviteRole || 'Staff') === r; return { label: r, select: () => this.set({ inviteRole: r }), bg: on ? '#ffffff' : 'transparent', color: on ? '#0f172a' : '#6b7385', shadow: on ? '0 1px 3px rgba(15,23,42,0.10)' : 'none' }; }),
+      inviteRoleHint: (s.inviteRole || 'Staff') === 'Staff' ? 'Can upload bills and edit transactions.' : 'Can view and export reports only.',
+      inviteAccess: this.businesses.map(b => { const sel = s.inviteAccess || [biz.name]; const on = sel.includes(b.name); return { name: b.name, trackBg: on ? '#5c70ff' : '#d5d9e4', knobLeft: on ? '19px' : '3px',
+        toggle: () => this.set({ inviteAccess: on ? sel.filter(x => x !== b.name) : sel.concat([b.name]) }) }; }),
+      inviteBg: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.inviteEmail || '') ? '#5c70ff' : '#aab4ff',
+      goInvite: () => this.setState({ screen: 'invite', inviteEmail: '', inviteName: '', inviteRole: 'Staff', inviteAccess: [biz.name] }),
+      sendInvite: () => { const em = s.inviteEmail || ''; if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return;
+        const nm = (s.inviteName || '').trim() || em.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        this.team.push({ name: nm, email: em, role: s.inviteRole || 'Staff', access: (s.inviteAccess || [biz.name]).slice(), status: 'active' });
+        this.setState({ screen: 'team', teamOpen: null }); this.flash(nm + ' added'); },
+      businessCards: this.businesses.map(b => Object.assign({}, b, { noAccounts: b.accounts.length === 0 })),
+      moreItems: [].concat([
+        { label: 'Charts', sub: 'Where the money goes', icon: 'bar-chart-3', color: '#0f172a', run: () => this.nav('charts') },
+        { label: 'Reports', sub: 'Export or share a summary', icon: 'file-text', color: '#0f172a', run: () => this.nav('reports') },
+        { label: 'Businesses', sub: this.businesses.length === 1 ? '1 business' : this.businesses.length + ' businesses', icon: 'building-2', color: '#0f172a', run: () => this.nav('businesses') },
+      ]).concat(this.isAdmin ? [{ label: 'Team', sub: this.team.length + ' users · manage access', icon: 'users', color: '#0f172a', run: () => this.nav('team') }] : []).concat([
+        { label: 'Profile', sub: s.email + (this.currentUser ? ' · ' + this.currentUser.role : ''), icon: 'user', color: '#0f172a', run: () => this.flash('Profile settings') },
+        { label: 'Sign out', sub: '', icon: 'log-out', color: '#dc2626', run: () => { this.ownedBusinesses = []; this.setState({ screen: 'login', ownsNew: false, hasBusiness: true, bizIdx: 0, acctIdx: 0 }); } },
+      ]).map(m => Object.assign({ chipBg: m.color === '#dc2626' ? 'rgba(220,38,38,0.08)' : 'rgba(92,112,255,0.08)', iconColor: m.color === '#dc2626' ? '#dc2626' : '#5c70ff' }, m)),
+      tabs: [
+        ['Home', 'house', 'home'], ['Transactions', 'list', 'transactions'],
+        ['Bills', 'receipt', 'receipts'], ['More', 'ellipsis', 'more'],
+      ].map(x => {
+        const active = s.screen === x[2] || (x[2] === 'transactions' && ['details', 'upload', 'csv'].includes(s.screen)) || (x[2] === 'more' && ['businesses', 'charts', 'reports', 'team', 'invite'].includes(s.screen));
+        return { label: x[0], icon: x[1], color: active ? '#5c70ff' : '#9aa1b4', pillBg: active ? 'rgba(92,112,255,0.10)' : 'transparent', weight: active ? 600 : 500, go: () => this.nav(x[2]) };
+      }),
+      sheetOpen: !!s.sheet, sheetTitle: sheetTitles[s.sheet] || '', sheetOptions,
+      openBizSheet: () => this.set({ sheet: 'biz' }), openAcctSheet: () => this.set({ sheet: 'acct' }),
+      openRangeSheet: () => this.set({ sheet: 'range' }), openCatSheet: () => this.set({ sheet: 'cat' }),
+      closeSheet: () => this.set({ sheet: null }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

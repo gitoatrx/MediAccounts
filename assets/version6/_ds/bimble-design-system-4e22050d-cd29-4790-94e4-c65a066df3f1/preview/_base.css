@@ -1,0 +1,21 @@
+/* Shared base for preview specimen cards. Each card links this + colors_and_type.css */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap");
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: #ffffff;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+}
+.card-pad { width: 100%; padding: 24px 28px; }
+.row { display: flex; align-items: center; gap: 14px; }
+.col { display: flex; flex-direction: column; }
+.wrap { display: flex; flex-wrap: wrap; gap: 12px; }
+.swatch { border-radius: 12px; border: 1px solid rgba(15,23,42,0.06); }
+.mono { font-variant-numeric: tabular-nums; }
+.tiny { font-size: 11px; letter-spacing: 0.04em; color: #64748b; }
+.tinier { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; }
