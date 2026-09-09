@@ -43,3 +43,16 @@ yarn-error.*
 
 # local device capture
 device-current.png
+
+# Local Android build tools and logs
+/.android-sdk/
+/.jdk/
+/.build-tools/
+/.gradle-user-home/
+/.gradle-release*.log
+
+# Generated build logs, device screenshots, and install packages
+*.log
+/device-*.png
+*.apk
+*.aab

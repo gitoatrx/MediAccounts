@@ -24,6 +24,7 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   CloudUpload,
   Download,
   Eye,
@@ -47,7 +48,7 @@ import {
   UsersRound,
 } from "lucide-react-native";
 import Svg, { Defs, LinearGradient as SvgLinearGradient, Path, Stop, Text as SvgText } from "react-native-svg";
-import { attachExistingBill, AuthSession, AvailableBill, billFileUrl, createBankAccount, createBusiness, createTransaction, createUser, downloadBillPreview, FinanceTransaction, getAvailableBills, getCurrentSession, getUsers, getWorkspace, importTransactionsCsv, ManagedUser, requestLoginCode, transactionBillFileUrl, updateProfile, updateTransaction, uploadBill, uploadStandaloneBill, verifyLoginCode, Workspace } from "./src/api";
+import { attachExistingBill, AuthSession, AvailableBill, billFileUrl, createBankAccount, createBusiness, createTransaction, createUser, downloadBillPreview, FinanceTransaction, getAvailableBills, getCurrentSession, getUsers, getWorkspace, importTransactionsCsv, ManagedUser, requestLoginCode, transactionBillFileUrl, updateProfile, updateTransaction, updateUser, updateUserBusinesses, uploadBill, uploadStandaloneBill, verifyLoginCode, Workspace } from "./src/api";
 
 // The HTML reference uses fixed CSS typography. Keep native screens visually
 // consistent on Android devices that have a larger system font setting.
@@ -173,7 +174,7 @@ export default function App() {
   if (page === "team")
     return (
       <View style={s.app}>
-        <Team token={sessionToken ?? ""} onBack={() => setPage("more")} onAdd={() => setPage("addUser")} />
+        <Team token={sessionToken ?? ""} businesses={authBusinesses} onBack={() => setPage("more")} onAdd={() => setPage("addUser")} />
         <Nav page="more" setPage={setPage} />
       </View>
     );
@@ -216,6 +217,11 @@ export default function App() {
       <Auth
         account={googleAccountSheet}
         onGoogle={() => setGoogleAccountSheet(true)}
+        onAccountBack={() => {
+          setGoogleAccountSheet(false);
+          setAuthError("");
+          setPage("login");
+        }}
         onAccountSelected={() => { setGoogleAccountSheet(false); setAuthError("Use your approved email address to receive a sign-in code."); }}
         email={email}
         onEmailChange={setEmail}
@@ -316,21 +322,37 @@ function GoogleIcon({ size = 28 }: { size?: number }) {
   return <Svg width={size} height={size} viewBox="0 0 24 24"><Path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.2-2.27H12v4.3h5.23a4.47 4.47 0 0 1-1.94 2.93v2.78h3.14c1.84-1.7 2.9-4.2 2.9-7.17 0-.76-.07-1.5-.2-2.2Z"/><Path fill="#34A853" d="M12 21.5c2.64 0 4.86-.88 6.48-2.4l-3.14-2.78c-.87.58-1.98.92-3.34.92-2.55 0-4.7-1.72-5.47-4.03H3.3V16.1A9.78 9.78 0 0 0 12 21.5Z"/><Path fill="#FBBC05" d="M6.53 13.21A5.88 5.88 0 0 1 6.22 12c0-.42.07-.82.2-1.21V7.9H3.3A9.5 9.5 0 0 0 2.5 12c0 1.57.38 3.05.8 4.1l3.23-2.89Z"/><Path fill="#EA4335" d="M12 6.76c1.48 0 2.8.51 3.84 1.5l2.88-2.81C16.86 3.72 14.64 2.5 12 2.5A9.78 9.78 0 0 0 3.3 7.9l3.23 2.89C7.3 8.48 9.45 6.76 12 6.76Z"/></Svg>;
 }
 
-function BrandWordmark() {
-  return <Svg width={285} height={46} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" fontWeight="800" fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
+function BrandWordmark({ width = 285, height = 46 }: { width?: number; height?: number }) {
+  return <Svg width={width} height={height} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" fontWeight="800" fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
 }
 
-function BrandMark() {
-  return <Svg width={48} height={48} viewBox="0 0 48 48" fill="none"><Path d="M12 34V14l11.2 13.4L35 14" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round"/><Path d="M29.5 34 36 21.5" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round"/></Svg>;
+function BrandMark({ size = 48 }: { size?: number }) {
+  return <Svg width={size} height={size} viewBox="0 0 48 48" fill="none"><Path d="M12 34V14l11.2 13.4L35 14" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round"/><Path d="M29.5 34 36 21.5" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round"/></Svg>;
 }
 
-function SlideUpSheet({ children, style }: { children: any; style: any }) {
+function SlideUpSheet({ children, style, scrollable = false }: { children: any; style: any; scrollable?: boolean }) {
   const translateY = useRef(new Animated.Value(460)).current;
   useEffect(() => {
     Animated.timing(translateY, { toValue: 0, duration: 360, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [translateY]);
-  return <Animated.View style={[style, { transform: [{ translateY }] }]}>{children}</Animated.View>;
+  return (
+    <Animated.View style={[style, sheetUi.safeArea, { transform: [{ translateY }] }]}>
+      {scrollable ? (
+        <ScrollView style={sheetUi.scroll} contentContainerStyle={sheetUi.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {children}
+        </ScrollView>
+      ) : children}
+    </Animated.View>
+  );
 }
+
+const sheetUi = StyleSheet.create({
+  // Keeps every sheet clear of Android's system navigation area and prevents
+  // long sheets from extending beyond the visible screen.
+  safeArea: { maxHeight: "86%", paddingBottom: 52 },
+  scroll: { width: "100%", flexShrink: 1 },
+  scrollContent: { paddingBottom: 4 },
+});
 
 function UploadOptionsSheet({ onClose, onCamera, onGallery, onFiles }: { onClose: () => void; onCamera: () => void; onGallery: () => void; onFiles: () => void }) {
   const options = [
@@ -341,7 +363,7 @@ function UploadOptionsSheet({ onClose, onCamera, onGallery, onFiles }: { onClose
   const actions = [onCamera, onGallery, onFiles];
   return <View style={s.overlay}>
     <Pressable style={s.overlayTap} onPress={onClose} />
-    <SlideUpSheet style={uploadOptions.sheet}>
+    <SlideUpSheet style={uploadOptions.sheet} scrollable>
       <View style={s.handle} />
       <View style={uploadOptions.head}>
         <View><Text style={uploadOptions.title}>Upload bill</Text><Text style={uploadOptions.subtitle}>Westside Retail · RBC **** 5614</Text></View>
@@ -362,7 +384,7 @@ function CsvUploadSheet({ token, workspace, selectedBankId, onClose, onImported 
   const upload = async () => { if (!workspace?.activeBusiness || !file) { setMessage('Choose a CSV file first.'); return; } if (!selectedBankId) { setMessage('Select an institution first.'); return; } setBusy(true); setMessage(''); try { const result = await importTransactionsCsv(token, { businessId: workspace.activeBusiness.id, bankAccountId: selectedBankId, file }); setMessage(`${result.imported} transactions imported${result.skippedRows.length ? `; ${result.skippedRows.length} rows skipped.` : '.'}`); setTimeout(onImported, 850); } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to import the CSV.'); } finally { setBusy(false); } };
   return <View style={s.overlay}>
     <Pressable style={s.overlayTap} onPress={onClose} />
-    <SlideUpSheet style={uploadOptions.sheet}>
+    <SlideUpSheet style={uploadOptions.sheet} scrollable>
       <View style={s.handle} />
       <View style={uploadOptions.head}>
         <View><Text style={uploadOptions.title}>Upload CSV</Text><Text style={uploadOptions.subtitle}>{workspace?.activeBusiness?.name ?? 'Choose a business first'}</Text></View>
@@ -393,6 +415,7 @@ const uploadOptions = StyleSheet.create({
 function Auth({
   account = false,
   onGoogle,
+  onAccountBack,
   onAccountSelected,
   onEmail,
   email,
@@ -402,6 +425,7 @@ function Auth({
 }: {
   account?: boolean;
   onGoogle: () => void;
+  onAccountBack: () => void;
   onAccountSelected: () => void;
   onEmail: () => void;
   email: string;
@@ -409,9 +433,12 @@ function Auth({
   busy: boolean;
   error: string;
 }) {
-  const accountSheetY = useRef(new Animated.Value(480)).current;
+  const accountSheetY = useRef(new Animated.Value(0)).current;
+  const loginSheetY = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (account) {
+      Keyboard.dismiss();
+      accountSheetY.setValue(480);
       Animated.timing(accountSheetY, {
         toValue: 0,
         duration: 420,
@@ -419,9 +446,42 @@ function Auth({
         useNativeDriver: true,
       }).start();
     } else {
-      accountSheetY.setValue(480);
+      accountSheetY.setValue(0);
     }
   }, [account, accountSheetY]);
+  useEffect(() => {
+    const moveLoginSheet = (toValue: number, duration?: number) => {
+      Animated.timing(loginSheetY, {
+        toValue,
+        duration: duration && duration > 0 ? duration : 250,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    };
+    const onKeyboardShow = Keyboard.addListener("keyboardDidShow", (event) => {
+      if (!account) moveLoginSheet(-event.endCoordinates.height, event.duration);
+    });
+    const onKeyboardHide = Keyboard.addListener("keyboardDidHide", (event) => {
+      moveLoginSheet(0, event.duration);
+    });
+    return () => {
+      onKeyboardShow.remove();
+      onKeyboardHide.remove();
+    };
+  }, [account, loginSheetY]);
+  const openGoogleAccountPicker = () => {
+    Keyboard.dismiss();
+    accountSheetY.setValue(480);
+    onGoogle();
+  };
+  const returnToSignIn = () => {
+    Keyboard.dismiss();
+    accountSheetY.stopAnimation();
+    accountSheetY.setValue(0);
+    loginSheetY.setValue(0);
+    onAccountBack();
+  };
+  const activeSheetY = account ? accountSheetY : loginSheetY;
   const loginTitle = {
     fontSize: 32,
     fontWeight: "800" as const,
@@ -459,9 +519,23 @@ function Auth({
         <BrandWordmark />
         <Text style={s.brandTagline}>BUSINESS FINANCE</Text>
       </View>
-      <Animated.View style={[s.sheet, account && s.accountSheet, account && { transform: [{ translateY: accountSheetY }] }]}>
+      <Animated.View
+        style={[
+          s.sheet,
+          account && s.accountSheet,
+          { transform: [{ translateY: activeSheetY }] },
+        ]}
+      >
         {account ? (
-          <>
+          <ScrollView
+            style={s.accountScroll}
+            contentContainerStyle={s.accountScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Pressable onPress={returnToSignIn} style={s.accountBack} accessibilityLabel="Back to sign in">
+              <Text style={s.accountBackArrow}>‹</Text>
+              <Text style={s.accountBackText}>Back to sign in</Text>
+            </Pressable>
             <View style={s.handle} />
             <View style={s.accountGoogle}><GoogleIcon size={30} /></View>
             <Text style={s.choose}>Choose an account</Text>
@@ -492,14 +566,14 @@ function Auth({
               <View style={s.otherIcon}><UserPlus size={23} color="#71809C" /></View>
               <Text style={s.otherText}>Use another account</Text>
             </Pressable>
-          </>
+          </ScrollView>
         ) : (
           <>
             <Text style={loginTitle}>Sign in</Text>
             <Text style={loginDesc}>
               Track spending and bills for your business.
             </Text>
-            <Pressable onPress={onGoogle} style={s.googleBtn}>
+            <Pressable onPress={openGoogleAccountPicker} style={s.googleBtn}>
               <View style={s.googleIconWrap}><GoogleIcon /></View>
               <Text style={s.googleBtnText}>Continue with Google</Text>
             </Pressable>
@@ -560,25 +634,43 @@ function Auth({
 }
 
 function Otp({ email, code, onCodeChange, busy, error, onBack, onNext, onResend }: { email: string; code: string; onCodeChange: (value: string) => void; busy: boolean; error: string; onBack: () => void; onNext: () => void; onResend: () => void }) {
+  const codeInputRef = useRef<TextInput>(null);
   return (
     <View style={otp.screen}>
-      <StatusBar style="dark" />
-      <Pressable onPress={onBack} style={otp.back}>
-        <Text style={otp.backText}>‹</Text>
-      </Pressable>
+      <StatusBar style="light" />
+      <View style={otp.topBar}>
+        <Pressable onPress={onBack} style={otp.back}>
+          <Text style={otp.backText}>‹</Text>
+        </Pressable>
+        <View style={otp.topBrand} pointerEvents="none">
+          <View style={otp.brandMark}><BrandMark size={31} /></View>
+          <BrandWordmark width={170} height={28} />
+        </View>
+        <View style={otp.topSpacer} />
+      </View>
       <View style={otp.body}>
         <View style={otp.mailIcon}><Mail size={28} color="#FFF" strokeWidth={2.1} /></View>
         <Text style={otp.title}>Check your email</Text>
         <Text style={otp.subtitle}>We sent a 6-digit code to</Text>
         <View style={otp.emailChip}><Mail size={18} color="#5C70FF" /><Text style={otp.emailText}>{email}</Text></View>
-      <View style={otp.cells}>
+      <Pressable style={otp.cells} onPress={() => codeInputRef.current?.focus()}>
         {Array.from({ length: 6 }, (_, i) => code[i] ?? "").map((v, i) => (
           <View style={[otp.cell, v && otp.filledCell]} key={i}>
             <Text style={otp.cellText}>{v}</Text>
           </View>
         ))}
-      </View>
-      <TextInput value={code} onChangeText={(value) => onCodeChange(value.replace(/\D/g, "").slice(0, 6))} keyboardType="number-pad" maxLength={6} editable={!busy} placeholder="Enter 6-digit code" placeholderTextColor="#9AA6BF" style={otp.codeInput} />
+      </Pressable>
+      <TextInput
+        ref={codeInputRef}
+        value={code}
+        onChangeText={(value) => onCodeChange(value.replace(/\D/g, "").slice(0, 6))}
+        keyboardType="number-pad"
+        maxLength={6}
+        editable={!busy}
+        caretHidden
+        accessibilityLabel="Six-digit verification code"
+        style={otp.hiddenCodeInput}
+      />
       {!!error && <Text style={otp.error}>{error}</Text>}
       <Pressable onPress={onNext} disabled={busy || code.length !== 6} style={[otp.continue, (busy || code.length !== 6) && otp.continueDisabled]}>
         <Text style={otp.continueText}>{busy ? "Checking…" : "Continue"}</Text>
@@ -596,28 +688,32 @@ function Otp({ email, code, onCodeChange, busy, error, onBack, onNext, onResend 
 }
 
 const otp = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#FFF", paddingTop: 52, paddingHorizontal: 26 },
-  back: { width: 48, height: 48, borderRadius: 15, borderWidth: 1, borderColor: "#DCE3F5", alignItems: "center", justifyContent: "center" },
-  backText: { fontSize: 28, color: "#17223A", marginTop: -4 },
-  body: { flex: 1, alignItems: "center", paddingTop: 100 },
-  mailIcon: { height: 58, width: 58, borderRadius: 19, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center" },
-  title: { marginTop: 22, fontSize: 25, fontWeight: "800", color: "#101A32" },
-  subtitle: { marginTop: 10, fontSize: 15, color: "#66748F" },
-  emailChip: { marginTop: 11, backgroundColor: "#F0F2FF", borderWidth: 1, borderColor: "#D9DFFF", borderRadius: 19, height: 38, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 7 },
-  emailText: { fontSize: 14, fontWeight: "600", color: "#5C70FF" },
+  screen: { flex: 1, backgroundColor: "#101A32", paddingTop: 52, paddingHorizontal: 26 },
+  topBar: { height: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#233552", paddingBottom: 4 },
+  back: { width: 44, height: 44, borderRadius: 14, borderWidth: 1, borderColor: "#314463", alignItems: "center", justifyContent: "center" },
+  backText: { fontSize: 28, color: "#FFF", marginTop: -4 },
+  topBrand: { position: "absolute", left: 0, right: 0, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  brandMark: { width: 38, height: 38, borderRadius: 12, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center" },
+  topSpacer: { width: 44, height: 44 },
+  body: { flex: 1, alignItems: "center", paddingTop: 82 },
+  mailIcon: { height: 54, width: 54, borderRadius: 27, borderWidth: 1, borderColor: "#5366AD", backgroundColor: "#182440", alignItems: "center", justifyContent: "center" },
+  title: { marginTop: 22, fontSize: 25, fontWeight: "800", color: "#FFF" },
+  subtitle: { marginTop: 10, fontSize: 15, color: "#B8C3DD" },
+  emailChip: { marginTop: 11, backgroundColor: "#1C2945", borderWidth: 1, borderColor: "#314463", borderRadius: 19, height: 38, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 7 },
+  emailText: { fontSize: 14, fontWeight: "600", color: "#AAB4FF" },
   cells: { width: "100%", flexDirection: "row", gap: 7, marginTop: 34 },
-  cell: { flex: 1, height: 58, borderRadius: 14, borderWidth: 1, borderColor: "#D9E1FB", backgroundColor: "#FFF", alignItems: "center", justifyContent: "center" },
-  filledCell: { borderColor: "#5C70FF", backgroundColor: "#FAFBFF" },
-  cellText: { fontSize: 22, fontWeight: "700", color: "#101A32" },
-  codeInput: { width: "100%", height: 50, borderRadius: 14, borderWidth: 1, borderColor: "#D9E1FB", color: "#101A32", fontSize: 17, paddingHorizontal: 16, marginTop: 12, textAlign: "center", letterSpacing: 4 },
-  error: { color: "#D9363E", fontSize: 13, textAlign: "center", marginTop: 10 },
+  cell: { flex: 1, height: 58, borderRadius: 14, borderWidth: 1, borderColor: "#314463", backgroundColor: "#182440", alignItems: "center", justifyContent: "center" },
+  filledCell: { borderColor: "#7182FF", backgroundColor: "#24345C" },
+  cellText: { fontSize: 22, fontWeight: "700", color: "#FFF" },
+  hiddenCodeInput: { position: "absolute", height: 1, width: 1, opacity: 0 },
+  error: { color: "#FFABB1", fontSize: 13, textAlign: "center", marginTop: 10 },
   continue: { alignSelf: "stretch", height: 58, borderRadius: 17, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center", marginTop: 20 },
   continueDisabled: { backgroundColor: "#A6B0FA" },
   continueText: { fontSize: 17, fontWeight: "800", color: "#FFF" },
   actions: { flexDirection: "row", alignItems: "center", gap: 20, marginTop: 22 },
-  resend: { fontSize: 14, fontWeight: "700", color: "#5C70FF" },
-  actionDivider: { height: 20, width: 1, backgroundColor: "#DFE4F0" },
-  change: { fontSize: 14, fontWeight: "600", color: "#17223A" },
+  resend: { fontSize: 14, fontWeight: "700", color: "#9EA9FF" },
+  actionDivider: { height: 20, width: 1, backgroundColor: "#314463" },
+  change: { fontSize: 14, fontWeight: "600", color: "#F1F4FF" },
 });
 
 function WelcomeSetup({
@@ -1228,6 +1324,36 @@ function SummaryMarquee({ text, style, scrollAfter = 25 }: { text: string; style
   return <View style={{ width: '100%', overflow: 'hidden' }}><Animated.Text numberOfLines={1} style={[style, { transform: [{ translateX: translate }] }]}>{text}</Animated.Text></View>;
 }
 
+function ContinuousMarquee({ text, clipStyle, textStyle, scrollAfter = 15 }: { text: string; clipStyle: object; textStyle: object; scrollAfter?: number }) {
+  const translate = useRef(new Animated.Value(0)).current;
+  const [textWidth, setTextWidth] = useState(0);
+  const shouldScroll = text.length > scrollAfter && textWidth > 0;
+  const travelDistance = textWidth + 28;
+
+  useEffect(() => {
+    if (!shouldScroll) {
+      translate.setValue(0);
+      return;
+    }
+    const animation = Animated.loop(Animated.sequence([
+      Animated.delay(1000),
+      Animated.timing(translate, { toValue: -travelDistance, duration: Math.max(3500, travelDistance * 18), easing: Easing.linear, useNativeDriver: true }),
+      Animated.timing(translate, { toValue: 0, duration: 0, useNativeDriver: true }),
+    ]));
+    animation.start();
+    return () => animation.stop();
+  }, [shouldScroll, text, translate, travelDistance]);
+
+  return (
+    <View style={clipStyle}>
+      <Animated.View style={{ alignSelf: "flex-start", flexDirection: "row", transform: [{ translateX: translate }] }}>
+        <Text numberOfLines={1} ellipsizeMode="clip" onLayout={(event) => setTextWidth(event.nativeEvent.layout.width)} style={textStyle}>{text}</Text>
+        {shouldScroll && <><View style={{ width: 28 }} /><Text numberOfLines={1} ellipsizeMode="clip" style={textStyle}>{text}</Text></>}
+      </Animated.View>
+    </View>
+  );
+}
+
 function Dashboard({
   workspace,
   error,
@@ -1274,9 +1400,7 @@ function Dashboard({
           <Text style={ui.fieldLabel}>BUSINESS</Text>
           <View style={ui.selector}>
             <Building2 size={18} color="#69758C" />
-            <Text numberOfLines={1} style={ui.selectorText}>
-              {activeBusiness?.name ?? "Loading business…"}
-            </Text>
+            <ContinuousMarquee text={activeBusiness?.name ?? "Loading business…"} clipStyle={ui.selectorMarqueeClip} textStyle={ui.selectorMarqueeText} />
             <ChevronDown size={18} color="#8F9AB0" />
           </View>
         </Pressable>
@@ -1284,9 +1408,7 @@ function Dashboard({
           <Text style={ui.fieldLabel}>BANK ACCOUNT</Text>
           <View style={ui.selector}>
             <Building2 size={18} color="#69758C" />
-            <Text numberOfLines={1} style={ui.selectorText}>
-              {activeBank ? `${activeBank.name.replace('Business Chequing', '').trim()} ${activeBank.maskedNumber}` : "No bank account"}
-            </Text>
+            <ContinuousMarquee text={activeBank ? `${activeBank.name.replace('Business Chequing', '').trim()} ${activeBank.maskedNumber}` : "No bank account"} clipStyle={ui.selectorMarqueeClip} textStyle={ui.selectorMarqueeText} />
             <ChevronDown size={18} color="#8F9AB0" />
           </View>
         </Pressable>
@@ -1365,6 +1487,8 @@ const ui = StyleSheet.create({
     gap: 8,
   },
   selectorText: { flex: 1, fontSize: 14, fontWeight: "600", color: "#253049" },
+  selectorMarqueeClip: { flex: 1, minWidth: 0, overflow: "hidden", justifyContent: "center" },
+  selectorMarqueeText: { flexShrink: 0, fontSize: 14, fontWeight: "600", color: "#253049" },
   spendCard: {
     height: 142,
     borderRadius: 25,
@@ -1543,7 +1667,7 @@ function TransactionDetails({ transaction, token, onChanged, onBack }: { transac
     </ScrollView>{sheet==='category'&&<DetailSheet title="Category" items={Array.from(new Set([category, ...categoryOptions]))} selected={category} onChoose={(x)=>{setCategory(x);setSheet('')}} close={()=>setSheet('')}/>} {sheet==='bill'&&<DetailSheet title="Add bill" items={['Take photo\nUse the camera','Choose from gallery\nPhotos on this device','Browse files\nPDF, PNG or JPG up to 10 MB']} selected="" onChoose={()=>setSheet('')} close={()=>setSheet('')}/>}</View>
   );
 }
-function DetailSheet({title,items,selected,onChoose,close}:{title:string,items:string[],selected:string,onChoose:(x:string)=>void,close:()=>void}){return <View style={s.overlay}><Pressable style={s.overlayTap} onPress={close}/><SlideUpSheet style={detail.sheet}><View style={s.handle}/><View style={detail.sheetHead}><Text style={detail.sheetTitle}>{title}</Text><Pressable style={s.close} onPress={close}><Text style={s.closeText}>×</Text></Pressable></View>{items.map(x=><Pressable key={x} onPress={()=>onChoose(x.split('\n')[0])} style={[detail.sheetRow,x===selected&&detail.sheetSelected]}><Text style={detail.sheetName}>{x.split('\n')[0]}</Text>{x.includes('\n')&&<Text style={detail.sheetSub}>{x.split('\n')[1]}</Text>}{x===selected&&<Text style={s.check}>✓</Text>}</Pressable>)}</SlideUpSheet></View>}
+function DetailSheet({title,items,selected,onChoose,close}:{title:string,items:string[],selected:string,onChoose:(x:string)=>void,close:()=>void}){return <View style={s.overlay}><Pressable style={s.overlayTap} onPress={close}/><SlideUpSheet style={detail.sheet} scrollable><View style={s.handle}/><View style={detail.sheetHead}><Text style={detail.sheetTitle}>{title}</Text><Pressable style={s.close} onPress={close}><Text style={s.closeText}>×</Text></Pressable></View>{items.map(x=><Pressable key={x} onPress={()=>onChoose(x.split('\n')[0])} style={[detail.sheetRow,x===selected&&detail.sheetSelected]}><Text style={detail.sheetName}>{x.split('\n')[0]}</Text>{x.includes('\n')&&<Text style={detail.sheetSub}>{x.split('\n')[1]}</Text>}{x===selected&&<Text style={s.check}>✓</Text>}</Pressable>)}</SlideUpSheet></View>}
 const detail = StyleSheet.create({
   detailRow:{minHeight:56,paddingHorizontal:16,flexDirection:'row',alignItems:'center',gap:10,borderBottomWidth:1,borderColor:'#E9EDF3'},rowLabel:{width:100,flexShrink:0},rowValue:{fontSize:16,fontWeight:'700',color:'#1D2840'},missing:{marginLeft:'auto',backgroundColor:'#FDEBEC',color:'#E13B48',paddingHorizontal:10,paddingVertical:5,borderRadius:14,fontSize:12,fontWeight:'700'},remarks:{flex:1,fontSize:14,color:'#1D2840'},bank:{fontSize:13,color:'#8290A8',marginTop:3},fieldPair:{flexDirection:'row',gap:16,padding:16,borderBottomWidth:1,borderColor:'#E9EDF3'},field:{flex:1,minWidth:0},input:{height:50,borderRadius:14,borderWidth:1,borderColor:'#E2E6EF',backgroundColor:'#FFF',paddingHorizontal:12,justifyContent:'center',fontSize:15,color:'#1D2840'},selectInput:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},sheet:{backgroundColor:'#FFF',borderTopLeftRadius:32,borderTopRightRadius:32,paddingHorizontal:20,paddingTop:14,paddingBottom:22},sheetHead:{flexDirection:'row',alignItems:'center',marginBottom:14},sheetTitle:{fontSize:22,fontWeight:'800',color:'#17223A'},sheetRow:{minHeight:66,borderRadius:18,borderWidth:1,borderColor:'#E1E6EF',paddingHorizontal:16,paddingVertical:11,marginBottom:8,justifyContent:'center'},sheetSelected:{borderColor:'#5C70FF',backgroundColor:'#F7F8FF'},sheetName:{fontSize:16,fontWeight:'700',color:'#17223A'},sheetSub:{fontSize:14,color:'#71809A',marginTop:2},
   taxInput:{height:50,borderRadius:14,borderWidth:1,borderColor:'#E2E6EF',backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',paddingLeft:12},taxValue:{flex:1,height:'100%',fontSize:15,color:'#1D2840'},taxToggle:{height:'100%',paddingHorizontal:10,flexDirection:'row',alignItems:'center',gap:6},taxCheckbox:{height:22,width:22,borderRadius:6,borderWidth:1.5,borderColor:'#C7D0E1',alignItems:'center',justifyContent:'center'},taxCheckboxSelected:{backgroundColor:'#5C70FF',borderColor:'#5C70FF'},taxCheckmark:{color:'#FFF',fontWeight:'900',fontSize:13},taxToggleText:{fontSize:15,color:'#5E6B83',fontWeight:'700'},
@@ -1738,7 +1862,7 @@ function StandaloneUploadPage({ token, workspace, selectedBankId, onUploaded }: 
   const save = async () => { if (!business || !account) { setMessage('Select a business and bank account on Home first.'); return; } if (!file) { setMessage('Take a photo or choose a bill first.'); return; } setSaving(true); setMessage(''); try { await uploadStandaloneBill(token, { businessId: business.id, bankAccountId: account.id, file }); await onUploaded(); setFile(null); setMessage('Bill uploaded successfully for this business and account.'); } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to upload the bill.'); } finally { setSaving(false); } };
   return <ScrollView contentContainerStyle={uploadScreen.screen}><View style={uploadScreen.header}><Text style={uploadScreen.title}>Upload bill</Text></View><Text style={uploadScreen.label}>Business</Text><View style={uploadScreen.selector}><Building2 size={21} color="#5C70FF"/><Text style={{ flex: 1, fontWeight: '800', color: '#17223A' }}>{business?.name ?? 'No business selected'}</Text></View><Text style={[uploadScreen.label, { marginTop: 18 }]}>Bank account</Text><View style={uploadScreen.selector}><Building2 size={21} color="#5C70FF"/><Text style={{ flex: 1, fontWeight: '800', color: '#17223A' }}>{account ? `${account.name} ${account.maskedNumber}` : 'No account selected'}</Text></View><Text style={[uploadScreen.label, { marginTop: 24 }]}>Upload bill</Text><View style={uploadScreen.dropzone}><View style={uploadScreen.camera}><Camera size={34} color="#6A758B" /></View><Text style={uploadScreen.dropTitle}>{file ? file.name : 'Tap an option to upload or capture a bill'}</Text><Text style={uploadScreen.dropSub}>{file ? 'Ready to save' : 'Select from gallery, camera, or files'}</Text>{file?.mimeType?.startsWith('image/') && <Image source={{ uri: file.uri }} style={{ width: 200, height: 140, marginTop: 12, borderRadius: 12 }} resizeMode="contain" />}</View><View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}><Pressable onPress={() => void choose('gallery')} style={[uploadScreen.selector, { height: 52, flex: 1, justifyContent: 'center' }]}><Text style={{ color: '#5C70FF', fontWeight: '800' }}>Gallery</Text></Pressable><Pressable onPress={() => void choose('camera')} style={[uploadScreen.selector, { height: 52, flex: 1, justifyContent: 'center' }]}><Text style={{ color: '#5C70FF', fontWeight: '800' }}>Take photo</Text></Pressable></View><Pressable onPress={() => void choose('file')} style={[uploadScreen.selector, { height: 52, justifyContent: 'center', marginTop: 10 }]}><Text style={{ color: '#5C70FF', fontWeight: '800' }}>Browse files</Text></Pressable>{!!message && <Text style={{ color: /success/i.test(message) ? '#159148' : '#D9363E', textAlign: 'center', fontWeight: '700', marginTop: 16 }}>{message}</Text>}<Pressable onPress={save} disabled={saving || !file || !business || !account} style={[uploadScreen.save, (saving || !file || !business || !account) && { backgroundColor: '#A7B1FA' }]}><Text style={uploadScreen.saveText}>{saving ? 'Saving…' : 'Save'}</Text></Pressable></ScrollView>;
 }
-function PickerSheet({title,items,choose,close}:{title:string,items:string[][],choose:(x:string)=>void,close:()=>void}){return <View style={s.overlay}><Pressable style={s.overlayTap} onPress={close}/><SlideUpSheet style={detail.sheet}><View style={s.handle}/><View style={detail.sheetHead}><Text style={detail.sheetTitle}>{title}</Text><Pressable style={s.close} onPress={close}><Text style={s.closeText}>×</Text></Pressable></View>{items.map(([name,sub])=><Pressable key={name} onPress={()=>choose(name)} style={detail.sheetRow}><Text style={detail.sheetName}>{name}</Text><Text style={detail.sheetSub}>{sub}</Text></Pressable>)}</SlideUpSheet></View>}
+function PickerSheet({title,items,choose,close}:{title:string,items:string[][],choose:(x:string)=>void,close:()=>void}){return <View style={s.overlay}><Pressable style={s.overlayTap} onPress={close}/><SlideUpSheet style={detail.sheet} scrollable><View style={s.handle}/><View style={detail.sheetHead}><Text style={detail.sheetTitle}>{title}</Text><Pressable style={s.close} onPress={close}><Text style={s.closeText}>×</Text></Pressable></View>{items.map(([name,sub])=><Pressable key={name} onPress={()=>choose(name)} style={detail.sheetRow}><Text style={detail.sheetName}>{name}</Text><Text style={detail.sheetSub}>{sub}</Text></Pressable>)}</SlideUpSheet></View>}
 const uploadScreen = StyleSheet.create({
   screen: {
     padding: 24,
@@ -1897,7 +2021,7 @@ function DateFilter({ onClose }: { onClose: () => void }) {
   return (
     <View style={transactionUi.overlay}>
       <Pressable onPress={onClose} style={transactionUi.overlayTap} />
-      <SlideUpSheet style={transactionUi.filterSheet}>
+      <SlideUpSheet style={transactionUi.filterSheet} scrollable>
         <View style={transactionUi.handle} />
         <View style={transactionUi.filterHead}>
           <Text style={transactionUi.filterTitle}>Filter by date</Text>
@@ -2595,7 +2719,36 @@ function AnalyticsHeader({ title, onBack, onFilter }: { title: string; onBack: (
 
 function RangeSheet({ selected, onChoose, onClose }: { selected: 'This month' | 'Last month' | 'This quarter' | 'Year to date'; onChoose: (period: 'This month' | 'Last month' | 'This quarter' | 'Year to date') => void; onClose: () => void }) {
   const periods: Array<'This month' | 'Last month' | 'This quarter' | 'Year to date'> = ['This month', 'Last month', 'This quarter', 'Year to date'];
-  return <View style={analytics.overlay}><Pressable style={StyleSheet.absoluteFill} onPress={onClose} /><SlideUpSheet style={analytics.rangeSheet}><View style={analytics.sheetHandle} /><View style={analytics.sheetHead}><Text style={analytics.sheetTitle}>Select date range</Text><Pressable onPress={onClose} style={analytics.close}><Text style={analytics.closeText}>×</Text></Pressable></View>{periods.map((period) => <Pressable key={period} onPress={() => { onChoose(period); onClose(); }} style={[analytics.rangeTab, { marginTop: 10, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16 }, selected === period && analytics.rangeTabActive]}><Text style={selected === period ? analytics.rangeTabActiveText : analytics.rangeTabText}>{period}</Text>{selected === period && <Text style={analytics.rangeTabActiveText}>✓</Text>}</Pressable>)}</SlideUpSheet></View>;
+  return (
+    <View style={analytics.overlay}>
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      <SlideUpSheet style={[analytics.rangeSheet, analytics.rangeSheetScrollable]}>
+        <View style={analytics.sheetHandle} />
+        <View style={analytics.sheetHead}>
+          <Text style={analytics.sheetTitle}>Select date range</Text>
+          <Pressable onPress={onClose} style={analytics.close}>
+            <Text style={analytics.closeText}>×</Text>
+          </Pressable>
+        </View>
+        <ScrollView
+          style={analytics.rangeOptions}
+          contentContainerStyle={analytics.rangeOptionsContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {periods.map((period) => (
+            <Pressable
+              key={period}
+              onPress={() => { onChoose(period); onClose(); }}
+              style={[analytics.rangeTab, { marginTop: 10, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16 }, selected === period && analytics.rangeTabActive]}
+            >
+              <Text style={selected === period ? analytics.rangeTabActiveText : analytics.rangeTabText}>{period}</Text>
+              {selected === period && <Text style={analytics.rangeTabActiveText}>✓</Text>}
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SlideUpSheet>
+    </View>
+  );
 }
 
 function Charts({ workspace, selectedBankId, selectedPeriod, onBack }: { workspace: Workspace | null; selectedBankId: string | null; selectedPeriod: 'This month' | 'Last month' | 'This quarter' | 'Year to date'; onBack: () => void }) {
@@ -2621,7 +2774,7 @@ function Tabs({ labels }: { labels: string[] }) {
 function Reports({ workspace, selectedBankId, selectedPeriod, onBack }: { workspace: Workspace | null; selectedBankId: string | null; selectedPeriod: 'This month' | 'Last month' | 'This quarter' | 'Year to date'; onBack: () => void }) {
   const [rangeOpen, setRangeOpen] = useState(false); const [range, setRange] = useState(selectedPeriod);
   const bank = workspace?.bankAccounts.find((account) => account.id === selectedBankId) ?? workspace?.bankAccounts[0]; const report = transactionSummary(transactionsForPeriod((workspace?.transactions ?? []).filter((item) => !selectedBankId || item.bankAccountId === selectedBankId), range));
-  return <View style={analytics.page}><ScrollView contentContainerStyle={analytics.screen}><AnalyticsHeader title="Reports" onBack={onBack} onFilter={() => setRangeOpen(true)} /><View style={analytics.selectors}><View style={analytics.selector}><Text style={analytics.selectorLabel}>BUSINESS</Text><View style={analytics.selectorValue}><Building2 size={20} color="#71809A"/><Text style={analytics.selectorText}>{workspace?.activeBusiness?.name ?? 'No business'}</Text></View></View><View style={analytics.selector}><Text style={analytics.selectorLabel}>BANK ACCOUNT</Text><View style={analytics.selectorValue}><Building2 size={20} color="#71809A"/><Text style={analytics.selectorText}>{bank ? `${bank.name} ${bank.maskedNumber}` : 'No bank account'}</Text></View></View></View><LinearGradient colors={["#121B35", "#12203B", "#33449A"]} start={{x:0,y:0}} end={{x:1,y:1}} style={analytics.reportSummary}><View style={analytics.summaryDate}><CalendarDays size={19} color="#B3BED7"/><Text style={analytics.summaryDateText}>{range}</Text></View><Text style={analytics.reportAmount}>{money(report.spent)}</Text><Text style={analytics.reportCaption}>Total spending · {bank?.maskedNumber ?? 'No account'}</Text><View style={analytics.summaryDivider}/><View style={analytics.summaryStats}><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>Transactions</Text><Text style={analytics.summaryValue}>{report.transactionCount}</Text></View><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>GST claimable</Text><Text style={analytics.summaryValue}>{money(report.gstClaimable)}</Text></View><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>Bills missing</Text><Text style={[analytics.summaryValue,{color:"#FFA7B0"}]}>{report.billsMissing}</Text></View></View></LinearGradient><View style={analytics.exportCard}><View style={analytics.exportTop}><View style={analytics.exportIcon}><FileText size={26} color="#5C70FF"/></View><View style={{flex:1}}><Text style={analytics.exportTitle}>Transactions report</Text><Text style={analytics.exportHint}>Date, remarks, amount, category, GST, PST, bill status</Text></View></View></View></ScrollView>{rangeOpen && <RangeSheet selected={range} onChoose={setRange} onClose={() => setRangeOpen(false)} />}</View>;
+  return <View style={analytics.page}><ScrollView contentContainerStyle={analytics.screen}><AnalyticsHeader title="Reports" onBack={onBack} onFilter={() => setRangeOpen(true)} /><View style={analytics.selectors}><View style={analytics.selector}><Text style={analytics.selectorLabel}>BUSINESS</Text><View style={analytics.selectorValue}><Building2 size={20} color="#71809A"/><ContinuousMarquee text={workspace?.activeBusiness?.name ?? 'No business'} clipStyle={analytics.selectorMarqueeClip} textStyle={analytics.selectorMarqueeText} /></View></View><View style={analytics.selector}><Text style={analytics.selectorLabel}>BANK ACCOUNT</Text><View style={analytics.selectorValue}><Building2 size={20} color="#71809A"/><ContinuousMarquee text={bank ? `${bank.name} ${bank.maskedNumber}` : 'No bank account'} clipStyle={analytics.selectorMarqueeClip} textStyle={analytics.selectorMarqueeText} /></View></View></View><LinearGradient colors={["#121B35", "#12203B", "#33449A"]} start={{x:0,y:0}} end={{x:1,y:1}} style={analytics.reportSummary}><View style={analytics.summaryDate}><CalendarDays size={19} color="#B3BED7"/><Text style={analytics.summaryDateText}>{range}</Text></View><Text style={analytics.reportAmount}>{money(report.spent)}</Text><Text style={analytics.reportCaption}>Total spending · {bank?.maskedNumber ?? 'No account'}</Text><View style={analytics.summaryDivider}/><View style={analytics.summaryStats}><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>Transactions</Text><Text style={analytics.summaryValue}>{report.transactionCount}</Text></View><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>GST claimable</Text><Text style={analytics.summaryValue}>{money(report.gstClaimable)}</Text></View><View style={analytics.summaryStat}><Text style={analytics.summaryLabel}>Bills missing</Text><Text style={[analytics.summaryValue,{color:"#FFA7B0"}]}>{report.billsMissing}</Text></View></View></LinearGradient><View style={analytics.exportCard}><View style={analytics.exportTop}><View style={analytics.exportIcon}><FileText size={26} color="#5C70FF"/></View><View style={{flex:1}}><Text style={analytics.exportTitle}>Transactions report</Text><Text style={analytics.exportHint}>Date, remarks, amount, category, GST, PST, bill status</Text></View></View></View></ScrollView>{rangeOpen && <RangeSheet selected={range} onChoose={setRange} onClose={() => setRangeOpen(false)} />}</View>;
 }
 function SmallStat({ label, val }: { label: string; val: string }) {
   return (
@@ -2665,6 +2818,8 @@ const analytics = StyleSheet.create({
   selectorLabel: { color: "#8A96AC", fontSize: 13, fontWeight: "800", marginBottom: 6 },
   selectorValue: { height: 54, borderRadius: 16, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#E0E5EF", paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 8 },
   selectorText: { flex: 1, minWidth: 0, color: "#17223A", fontSize: 15, fontWeight: "700" },
+  selectorMarqueeClip: { flex: 1, minWidth: 0, overflow: "hidden", justifyContent: "center" },
+  selectorMarqueeText: { flexShrink: 0, color: "#17223A", fontSize: 15, fontWeight: "700" },
   reportSummary: { borderRadius: 24, padding: 20, paddingBottom: 18, marginBottom: 16 },
   summaryDate: { flexDirection: "row", alignItems: "center", gap: 10 },
   summaryDateText: { color: "#B4BED4", fontSize: 14 },
@@ -2684,6 +2839,9 @@ const analytics = StyleSheet.create({
   exportButtonText: { color: "#FFF", fontSize: 17, fontWeight: "800" },
   overlay: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(20,30,50,.38)", justifyContent: "flex-end", zIndex: 4 },
   rangeSheet: { backgroundColor: "#FFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 22 },
+  rangeSheetScrollable: { maxHeight: 500, paddingBottom: 0 },
+  rangeOptions: { width: "100%", flexShrink: 1 },
+  rangeOptionsContent: { paddingBottom: 56 },
   sheetHandle: { alignSelf: "center", width: 60, height: 5, borderRadius: 3, backgroundColor: "#E2E6EF", marginBottom: 14 },
   sheetHead: { flexDirection: "row", alignItems: "center", marginBottom: 14 },
   sheetTitle: { color: "#101A32", fontSize: 22, fontWeight: "800" },
@@ -2737,12 +2895,39 @@ function AddInstitution({ token, business, onBack, onSaved }: { token: string; b
 const pageUi = StyleSheet.create({
   screen: { padding: 16, paddingTop: 18, paddingBottom: 126, backgroundColor: "#F4F6FA", flexGrow: 1 }, header: { height: 62, flexDirection: "row", alignItems: "center", marginBottom: 16 }, back: { height: 48, width: 48, borderRadius: 15, borderWidth: 1, borderColor: "#E0E5EF", backgroundColor: "#FFF", alignItems: "center", justifyContent: "center" }, backText: { fontSize: 30, color: "#253049", marginTop: -4 }, title: { color: "#101A32", fontSize: 27, fontWeight: "800", marginLeft: 16 }, profileCard: { minHeight: 126, padding: 22, borderRadius: 25, borderWidth: 1, borderColor: "#E2E6EF", backgroundColor: "#FFF", flexDirection: "row", alignItems: "center", marginBottom: 20 }, profileIcon: { height: 78, width: 78, borderRadius: 25, backgroundColor: "#EEF0FF", alignItems: "center", justifyContent: "center", marginRight: 20 }, profileName: { color: "#101A32", fontSize: 18, fontWeight: "800" }, profileEmail: { color: "#71809A", fontSize: 15, marginTop: 4 }, staff: { color: "#5C70FF", backgroundColor: "#EEF0FF", borderRadius: 15, paddingHorizontal: 13, paddingVertical: 6, fontSize: 14, fontWeight: "700" }, formCard: { borderRadius: 25, borderWidth: 1, borderColor: "#E2E6EF", backgroundColor: "#FFF", padding: 22 }, formLabel: { color: "#101A32", fontSize: 15, fontWeight: "600", marginBottom: 10 }, formFieldSpaced: { marginTop: 20 }, formInput: { height: 64, borderRadius: 18, borderWidth: 1, borderColor: "#E0E5EF", paddingHorizontal: 18, fontSize: 17, color: "#17223A" }, formInputDisabled: { backgroundColor: "#F7F8FC", color: "#71809A" }, save: { height: 76, borderRadius: 21, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center", marginTop: 22 }, saveText: { color: "#FFF", fontSize: 20, fontWeight: "800" }, add: { height: 54, borderRadius: 17, paddingHorizontal: 16, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center" }, addText: { color: "#FFF", fontSize: 16, fontWeight: "800" }, businessCard: { borderRadius: 25, borderWidth: 1, borderColor: "#E2E6EF", backgroundColor: "#FFF", padding: 24 }, businessHead: { flexDirection: "row", alignItems: "center" }, initials: { height: 68, width: 68, borderRadius: 20, backgroundColor: "#5C70FF", alignItems: "center", justifyContent: "center", marginRight: 16 }, initialsText: { color: "#FFF", fontSize: 22, fontWeight: "800" }, active: { borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: "#EAF6EF" }, activeText: { color: "#159148", fontSize: 13, fontWeight: "700" }, cardDivider: { height: 1, backgroundColor: "#E9EDF3", marginVertical: 20 }, accountRow: { minHeight: 96, borderRadius: 20, borderWidth: 1, borderColor: "#E1E6EF", padding: 14, flexDirection: "row", alignItems: "center", marginTop: 12 }, accountIcon: { height: 60, width: 60, borderRadius: 17, backgroundColor: "#121B34", alignItems: "center", justifyContent: "center", marginRight: 16 }, accountName: { color: "#101A32", fontSize: 16, fontWeight: "800" }, accountNumber: { color: "#8A96AC", fontSize: 14, marginTop: 4 }, accountBalance: { color: "#101A32", fontSize: 16, fontWeight: "800" }, balanceLabel: { color: "#8A96AC", fontSize: 13, marginTop: 4 },
 });
-function Team({ onBack, onAdd, token }: { token: string; onBack: () => void; onAdd: () => void }) {
-  const [open, setOpen] = useState(false);
+function Team({ onBack, onAdd, token, businesses }: { token: string; businesses: Array<{ id: string; name: string; slug: string }>; onBack: () => void; onAdd: () => void }) {
+  const [openUserId, setOpenUserId] = useState<string | null>(null);
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loadError, setLoadError] = useState("");
+  const [savingUserId, setSavingUserId] = useState<string | null>(null);
   useEffect(() => { void getUsers(token).then((result) => setUsers(result.users)).catch((error) => setLoadError(error instanceof Error ? error.message : 'Unable to load users.')); }, [token]);
-  const people = users.map((user) => [user.name.split(' ').map((word) => word[0]).join('').slice(0, 2).toUpperCase(), user.name, user.role[0].toUpperCase() + user.role.slice(1), user.email, user.businesses.length ? user.businesses.map((business) => business.name).join(', ') : 'No business access']);
+  const activeUsers = users.filter((user) => user.isActive);
+  const toggleBusiness = async (user: ManagedUser, businessId: string) => {
+    const businessIds = user.businesses.some((business) => business.id === businessId)
+      ? user.businesses.filter((business) => business.id !== businessId).map((business) => business.id)
+      : [...user.businesses.map((business) => business.id), businessId];
+    setSavingUserId(user.id);
+    try {
+      const result = await updateUserBusinesses(token, user.id, businessIds);
+      setUsers((items) => items.map((item) => item.id === user.id ? { ...item, businesses: result.businesses } : item));
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Unable to update business access.');
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+  const deactivateUser = async (user: ManagedUser) => {
+    setSavingUserId(user.id);
+    try {
+      await updateUser(token, user.id, { isActive: false });
+      setUsers((items) => items.filter((item) => item.id !== user.id));
+      setOpenUserId(null);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Unable to remove user.');
+    } finally {
+      setSavingUserId(null);
+    }
+  };
   return (
     <ScrollView contentContainerStyle={team.screen}>
       <View style={team.header}>
@@ -2756,51 +2941,53 @@ function Team({ onBack, onAdd, token }: { token: string; onBack: () => void; onA
         <Text style={team.addText}>Add user</Text>
       </Pressable>
       {!!loadError && <Text style={{ color: '#D9363E', textAlign: 'center', marginBottom: 12 }}>{loadError}</Text>}
-      {!loadError && !people.length && <Text style={{ color: '#71809A', textAlign: 'center', marginTop: 16 }}>No users have been added yet.</Text>}
-      {people.map((p, index) => (
+      {!loadError && !activeUsers.length && <Text style={{ color: '#71809A', textAlign: 'center', marginTop: 16 }}>No users have been added yet.</Text>}
+      {activeUsers.map((user) => {
+        const isOpen = openUserId === user.id;
+        const initials = user.name.split(' ').map((word) => word[0]).join('').slice(0, 2).toUpperCase();
+        return (
         <Pressable
-          key={p[1]}
-          onPress={() => index === 1 && setOpen(!open)}
-          style={[team.card, index === 1 && open && team.openCard]}
+          key={user.id}
+          onPress={() => setOpenUserId(isOpen ? null : user.id)}
+          style={[team.card, isOpen && team.openCard]}
         >
-          <View style={team.initials}>
-            <Text style={team.initialText}>{p[0]}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <Text style={team.name}>{p[1]}</Text>
-              <Text style={team.role}>{p[2]}</Text>
+          <View style={team.cardRow}>
+            <View style={team.initials}>
+              <Text style={team.initialText}>{initials}</Text>
             </View>
-            <Text style={team.email}>{p[3]}</Text>
-            <Text style={team.access}>{p[4]}</Text>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={team.name}>{user.name}</Text>
+                <Text style={team.role}>{user.role[0].toUpperCase() + user.role.slice(1)}</Text>
+              </View>
+              <Text style={team.email}>{user.email}</Text>
+              <Text style={team.access}>{user.businesses.length ? user.businesses.map((business) => business.name).join(', ') : 'No business access'}</Text>
+            </View>
+            {isOpen ? <ChevronUp size={22} color="#7E8CA7" /> : <ChevronDown size={22} color="#7E8CA7" />}
           </View>
-          <Text style={team.chev}>
-            {index === 0 ? "⌾" : index === 1 && open ? "⌃" : "⌄"}
-          </Text>
-          {index === 1 && open && (
+          {isOpen && (
             <View style={team.expand}>
               <Text style={ui.fieldLabel}>BUSINESS ACCESS</Text>
-              {[
-                "Westside Retail",
-                "Harbour Compounding",
-                "Nanaimo Corner Mart",
-              ].map((business, i) => (
-                <View style={team.toggleRow} key={business}>
-                  <Text style={team.toggleLabel}>{business}</Text>
-                  <View style={[team.toggle, i === 0 && team.toggleOn]}>
+              {businesses.map((business) => {
+                const hasAccess = user.businesses.some((item) => item.id === business.id);
+                return (
+                <Pressable disabled={savingUserId === user.id} onPress={() => void toggleBusiness(user, business.id)} style={team.toggleRow} key={business.id}>
+                  <Text style={team.toggleLabel}>{business.name}</Text>
+                  <View style={[team.toggle, hasAccess && team.toggleOn]}>
                     <View style={team.knob} />
                   </View>
-                </View>
-              ))}
-              <Pressable style={team.remove}>
-                <Text style={team.removeText}>Remove user</Text>
-              </Pressable>
+                </Pressable>
+                );
+              })}
+              {!businesses.length && <Text style={team.emptyAccess}>No businesses are available.</Text>}
+              {!user.isSeedAdmin && <Pressable disabled={savingUserId === user.id} onPress={() => void deactivateUser(user)} style={[team.remove, savingUserId === user.id && { opacity: 0.55 }]}>
+                <Text style={team.removeText}>{savingUserId === user.id ? 'Removing…' : 'Remove user'}</Text>
+              </Pressable>}
             </View>
           )}
         </Pressable>
-      ))}
+        );
+      })}
     </ScrollView>
   );
 }
@@ -2940,12 +3127,11 @@ const team = StyleSheet.create({
     borderColor: "#E2E6EF",
     borderRadius: 23,
     padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
     marginBottom: 14,
     overflow: "hidden",
   },
   openCard: { paddingBottom: 0 },
+  cardRow: { flexDirection: "row", alignItems: "center" },
   initials: {
     height: 58,
     width: 58,
@@ -3000,6 +3186,7 @@ const team = StyleSheet.create({
   },
   toggleOn: { backgroundColor: "#5C70FF", alignItems: "flex-end" },
   knob: { height: 28, width: 28, borderRadius: 14, backgroundColor: "#FFF" },
+  emptyAccess: { color: "#71809A", fontSize: 14, marginTop: 14, textAlign: "center" },
   remove: {
     height: 58,
     borderRadius: 17,
@@ -3193,7 +3380,7 @@ function BusinessSheet({
   return (
     <View style={s.overlay}>
       <Pressable style={s.overlayTap} onPress={onClose} />
-      <SlideUpSheet style={s.homeBusiness}>
+      <SlideUpSheet style={s.homeBusiness} scrollable>
         <View style={s.homeBusinessHandle} />
         <View style={s.homeBusinessHead}>
           <Text style={s.homeBusinessTitle}>Select business</Text>
@@ -3223,7 +3410,7 @@ function BankSheet({ accounts, selectedBankId, onChoose, onAdd, onClose }: { acc
   return (
     <View style={s.overlay}>
       <Pressable style={s.overlayTap} onPress={onClose} />
-      <SlideUpSheet style={s.business}>
+      <SlideUpSheet style={s.business} scrollable>
         <View style={s.handle} />
         <View style={s.businessHead}>
           <Text style={s.businessTitle}>Select bank account</Text>
@@ -3260,7 +3447,7 @@ function PeriodSheet({ selected, onChoose, onClose }: { selected: 'This month' |
   return (
     <View style={s.overlay}>
       <Pressable style={s.overlayTap} onPress={onClose} />
-      <SlideUpSheet style={s.business}>
+      <SlideUpSheet style={[s.business, s.periodSheet]}>
         <View style={s.handle} />
         <View style={s.businessHead}>
           <Text style={s.businessTitle}>Date range</Text>
@@ -3268,19 +3455,25 @@ function PeriodSheet({ selected, onChoose, onClose }: { selected: 'This month' |
             <Text style={s.closeText}>×</Text>
           </Pressable>
         </View>
-        {periods.map((period, index) => (
-          <Pressable
-            onPress={() => onChoose(period[0] as 'This month' | 'Last month' | 'This quarter' | 'Year to date')}
-            key={period[0]}
-            style={[s.businessRow, period[0] === selected && s.businessSelected]}
-          >
-            <View>
-              <Text style={s.businessName}>{period[0]}</Text>
-              <Text style={s.businessSub}>{period[1]}</Text>
-            </View>
-            {period[0] === selected && <Text style={s.check}>✓</Text>}
-          </Pressable>
-        ))}
+        <ScrollView
+          style={s.periodOptions}
+          contentContainerStyle={s.periodOptionsContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {periods.map((period) => (
+            <Pressable
+              onPress={() => onChoose(period[0] as 'This month' | 'Last month' | 'This quarter' | 'Year to date')}
+              key={period[0]}
+              style={[s.businessRow, period[0] === selected && s.businessSelected]}
+            >
+              <View>
+                <Text style={s.businessName}>{period[0]}</Text>
+                <Text style={s.businessSub}>{period[1]}</Text>
+              </View>
+              {period[0] === selected && <Text style={s.check}>✓</Text>}
+            </Pressable>
+          ))}
+        </ScrollView>
       </SlideUpSheet>
     </View>
   );
@@ -3337,7 +3530,7 @@ function Flow({
   return (
     <View style={s.overlay}>
       <Pressable style={s.overlayTap} onPress={close} />
-      <SlideUpSheet style={s.business}>
+      <SlideUpSheet style={s.business} scrollable>
         <View style={s.handle} />
         <View style={s.businessHead}>
           <Text style={s.businessTitle}>{copy[0]}</Text>
@@ -3437,7 +3630,12 @@ const s = StyleSheet.create({
     paddingTop: 26,
     paddingBottom: 24,
   },
-  accountSheet: { paddingTop: 12, paddingBottom: 20 },
+  accountSheet: { paddingTop: 12, paddingBottom: 0, marginBottom: 0, maxHeight: 520 },
+  accountScroll: { width: "100%" },
+  accountScrollContent: { paddingBottom: 64 },
+  accountBack: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", minHeight: 36, paddingHorizontal: 4, marginBottom: 2 },
+  accountBackArrow: { color: "#5367FF", fontSize: 28, lineHeight: 30, marginRight: 5, marginTop: -3 },
+  accountBackText: { color: "#5367FF", fontSize: 14, fontWeight: "800" },
   welcome: { fontSize: 31, fontWeight: "800", color: "#101A32" },
   desc: { fontSize: 16, color: "#66748F", marginTop: 9, marginBottom: 28 },
   googleBtn: {
@@ -3909,18 +4107,19 @@ const s = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 104,
+    height: 124,
     backgroundColor: "#FFF",
     borderTopWidth: 1,
     borderColor: "#E1E5EF",
     flexDirection: "row",
-    paddingTop: 13,
+    paddingTop: 12,
+    paddingBottom: 22,
   },
   navItem: { flex: 1, alignItems: "center", paddingTop: 2, borderRadius: 16 },
   navItemPressed: { opacity: 0.72 },
   navIcon: { fontSize: 24, color: "#9AA5BB", fontWeight: "700" },
-  navText: { fontSize: 12, color: "#909BB4", marginTop: 4 },
-  navActive: { color: "#5367FF", fontWeight: "800" },
+  navText: { fontSize: 12, color: "#53627C", marginTop: 4, fontWeight: "700" },
+  navActive: { color: "#4358E8", fontWeight: "800" },
   overlay: {
     position: "absolute",
     top: 0,
@@ -3939,6 +4138,9 @@ const s = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 22,
   },
+  periodSheet: { maxHeight: 500, paddingBottom: 0 },
+  periodOptions: { width: "100%", flexShrink: 1 },
+  periodOptionsContent: { paddingBottom: 56 },
   homeBusiness: {
     backgroundColor: "#FFF",
     borderTopLeftRadius: 32,

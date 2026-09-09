@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_MEDIACCOUNTS_API_URL ?? "http://10.0.2.2:4000";
+  process.env.EXPO_PUBLIC_MEDIACCOUNTS_API_URL ?? "http://127.0.0.1:4000";
 
 type ApiError = { error?: string };
 
@@ -85,6 +85,22 @@ export function createUser(token: string, input: { name: string; email: string; 
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(input),
+  });
+}
+
+export function updateUser(token: string, userId: string, input: { role?: "admin" | "staff" | "accountant"; isActive?: boolean }) {
+  return request<{ user: ManagedUser }>(`/users/${userId}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateUserBusinesses(token: string, userId: string, businessIds: string[]) {
+  return request<{ businesses: ManagedUser["businesses"] }>(`/users/${userId}/businesses`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ businessIds }),
   });
 }
 

@@ -1,0 +1,10 @@
+// Expo native modules require the shared Android C++ runtime.
+allprojects { p ->
+    ['com.android.application', 'com.android.library'].each { pluginId ->
+        p.pluginManager.withPlugin(pluginId) {
+            p.extensions.getByName('android').defaultConfig.externalNativeBuild.cmake.arguments(
+                '-DANDROID_STL=c++_shared'
+            )
+        }
+    }
+}
