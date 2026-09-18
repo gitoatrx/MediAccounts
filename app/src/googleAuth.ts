@@ -1,14 +1,19 @@
+import { Platform } from 'react-native';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 
 // The Web client ID (client_type 3) from Firebase -> Authentication -> Google.
 // Google returns ID tokens for this audience, which Firebase then accepts.
 const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+// iOS also needs its own client ID (CLIENT_ID in GoogleService-Info.plist); app.config.js registers its URL scheme.
+const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
 
 let configured = false;
 function ensureConfigured() {
   if (!webClientId) throw new Error('Google sign-in is not set up in this app yet.');
+  // Without an iOS client ID the native SDK crashes the app instead of returning an error.
+  if (Platform.OS === 'ios' && !iosClientId) throw new Error('Google sign-in is not set up for iPhone yet.');
   if (!configured) {
-    GoogleSignin.configure({ webClientId });
+    GoogleSignin.configure({ webClientId, iosClientId });
     configured = true;
   }
 }
@@ -26,7 +31,7 @@ export async function getGoogleIdToken() {
 }
 
 export async function signOutGoogle() {
-  if (!webClientId) return;
+  if (!webClientId || (Platform.OS === 'ios' && !iosClientId)) return;
   ensureConfigured();
   await GoogleSignin.signOut().catch(() => undefined);
 }
