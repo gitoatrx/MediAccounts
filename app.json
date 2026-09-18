@@ -4,21 +4,25 @@
     "slug": "MediAccounts",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/mediaccounts-app-icon.png",
+    "splash": {
+      "image": "./assets/mediaccounts-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#030A2B"
+    },
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/mediaccounts-adaptive-icon.png",
+        "backgroundImage": "./assets/mediaccounts-icon-background.png",
+        "backgroundColor": "#152344"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.MediAccounts"
+      "package": "com.anonymous.MediAccounts",
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,7 +36,18 @@
           "photosPermission": "Allow MediAccounts to choose bill images.",
           "cameraPermission": "Allow MediAccounts to take bill photos."
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-sharing",
+      "./plugins/withHighSamplingRateSensors"
     ]
   }
 }
