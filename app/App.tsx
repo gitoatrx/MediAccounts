@@ -772,10 +772,11 @@ const sheetUi = StyleSheet.create({
   scrollContent: { paddingBottom: 4 },
 });
 
-function UploadOptionsSheet({ title = "Upload bill", subtitle = "Choose how to add the bill", onClose, onCamera, onGallery, onFiles }: { title?: string; subtitle?: string; onClose: () => void; onCamera: () => void; onGallery: () => void; onFiles?: () => void }) {
+function UploadOptionsSheet({ title = "Upload bill", subtitle = "Choose how to add the bill", onClose, onCamera, onGallery, onFiles, onLibrary, librarySubtitle }: { title?: string; subtitle?: string; onClose: () => void; onCamera: () => void; onGallery: () => void; onFiles?: () => void; onLibrary?: () => void; librarySubtitle?: string }) {
   const options = [
     { title: "Take photo", subtitle: "Use the camera", Icon: Camera, action: onCamera },
     { title: "Choose from gallery", subtitle: "Photos on this device", Icon: ImageIcon, action: onGallery },
+    ...(onLibrary ? [{ title: "Uploaded bills", subtitle: librarySubtitle ?? "Pick one already uploaded", Icon: Images, action: onLibrary }] : []),
     ...(onFiles ? [{ title: "Browse files", subtitle: "JPG or PNG image", Icon: Folder, action: onFiles }] : []),
   ];
   return <View style={s.overlay}>
@@ -1586,7 +1587,7 @@ function AuthImage({ token, url, cacheKey, style }: { token: string; url: string
     void downloadBillPreview(token, url, cacheKey.replace(/[^a-z0-9-]/gi, ""), "image/jpeg").then((local) => { if (active) setUri(local); }).catch(() => undefined);
     return () => { active = false; };
   }, [token, url, cacheKey]);
-  return uri ? <LoadingImage uri={uri} style={style} /> : <View style={[style, loadingImageUi.frame]}><ActivityIndicator size="small" color="#8A96AC" /></View>;
+  return uri ? <LoadingImage uri={uri} style={style} /> : <Skeleton style={[style, loadingImageUi.frame]}><Bone width="100%" height="100%" radius={0} /></Skeleton>;
 }
 
 /**
@@ -1600,7 +1601,9 @@ function LoadingImage({ uri, style, resizeMode = "cover", dark = false }: { uri:
   return <View style={[style, loadingImageUi.frame, dark && loadingImageUi.dark]}>
     <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode={resizeMode} onLoad={() => setState("loaded")} onError={() => setState("failed")} />
     {state !== "loaded" && <View pointerEvents="none" style={loadingImageUi.overlay}>
-      {state === "loading" ? <ActivityIndicator size="small" color={dark ? "#FFF" : "#5C70FF"} /> : <ImageOff size={24} color={dark ? "#C8CFDC" : "#9AA5BB"} />}
+      {state === "loading"
+        ? <Skeleton style={StyleSheet.absoluteFill}><Bone width="100%" height="100%" radius={0} /></Skeleton>
+        : <ImageOff size={24} color={dark ? "#C8CFDC" : "#9AA5BB"} />}
     </View>}
   </View>;
 }
@@ -2545,6 +2548,8 @@ function TransactionDetails({ transaction, token, onChanged, onBack, openCategor
   useEffect(() => { if (!token || !transaction?.businessId) { setCategoryOptions([]); return; } setLoadingCategories(true); void getCategories(token, transaction.businessId).then(({ categories }) => setCategoryOptions(categories)).catch(() => setCategoryOptions([])).finally(() => setLoadingCategories(false)); }, [token, transaction?.businessId]);
   const [savingCategory, setSavingCategory] = useState(false);
   const [billSource, setBillSource] = useState(false);
+  // "Uploaded bills" sheet: pick a bill someone already uploaded for this bank.
+  const [billPicker, setBillPicker] = useState(false);
   // Like OATRx, a category is saved as soon as it is picked or typed in.
   const chooseCategory = async (next: string) => {
     setSheet('');
@@ -2592,24 +2597,26 @@ function TransactionDetails({ transaction, token, onChanged, onBack, openCategor
       .finally(() => { if (!cancelled) setPreviewLoading(false); });
     return () => { cancelled = true; };
   }, [token, transaction?.id, transaction?.billStatus, transaction?.billMimeType, pendingBill, availableBills, selectedExistingBillId]);
-  const chooseBill = () => setBillSource(true);
+  const chooseBill = () => { if (!billLocked) setBillSource(true); };
   const save = async () => { if (!transaction || !token) return; const parsedGst = Number(gst.trim() || 0); const parsedPst = Number(pst.trim() || 0); if (!Number.isFinite(parsedGst) || !Number.isFinite(parsedPst)) { setMessage('GST and PST must be valid amounts.'); return; } setSaving(true); setMessage(''); try { await updateTransaction(token, transaction.id, { category, memo, gst: parsedGst, pst: parsedPst }); if (pendingBill) await uploadBill(token, transaction.id, pendingBill); else if (selectedExistingBillId) await attachExistingBill(token, transaction.id, selectedExistingBillId); await onChanged(); const matched = !!pendingBill || !!selectedExistingBillId; setPendingBill(null); setSelectedExistingBillId(''); setMessage(matched ? 'Bill attached to this transaction.' : 'Changes saved.'); } catch (cause) { setMessage(cause instanceof Error ? cause.message : 'Unable to save changes.'); } finally { setSaving(false); } };
   const attached = transaction?.billStatus === 'attached';
   const aiMatched = transaction?.billMappedBy === 'AI';
+  // Once a bill is attached it cannot be swapped or removed.
+  const billLocked = attached && !pendingBill && !selectedExistingBillId;
   const [viewerUri, setViewerUri] = useState('');
-  useBackHandler(!!sheet || billSource, () => { setSheet(''); setBillSource(false); });
+  useBackHandler(!!sheet || billSource || billPicker, () => { setSheet(''); setBillSource(false); setBillPicker(false); });
   const messageIsSuccess = /ready|saved|attached/i.test(message);
   useMessageHaptic(/ready/i.test(message) ? '' : message, !messageIsSuccess);
   useAutoClear(!!message && messageIsSuccess, message, () => setMessage(''));
   // Lift the page above the tab bar while a sheet is open so the sheet is not covered.
   return (
-    <View style={[{flex:1,backgroundColor:'#F4F6FA'}, (!!sheet || billSource) && { zIndex: 20, elevation: 20 }]}><ScrollView contentContainerStyle={detail.screen}>
+    <View style={[{flex:1,backgroundColor:'#F4F6FA'}, (!!sheet || billSource || billPicker) && { zIndex: 20, elevation: 20 }]}><ScrollView contentContainerStyle={detail.screen}>
       <View style={detail.header}>
         <BackButton onPress={onBack} />
         <Text style={detail.title}>Transaction details</Text>
       </View>
       <LinearGradient colors={['#111A32','#17264C','#2B3C82']} start={{x:0,y:0.25}} end={{x:1,y:0.75}} style={detail.summaryCard}>
-        <View style={detail.summaryTop}><Text numberOfLines={1} style={detail.summaryMeta}>{transaction?.postedLabel ?? ''} · {transaction?.bankAccountNumber ?? 'No account'}</Text><View style={[detail.summaryBadge, !attached && { backgroundColor: '#502433' }]}>{attached && <Text style={detail.summaryCheck}>✓</Text>}<Text style={detail.summaryBadgeText}>{attached ? 'Bill attached' : 'Bill missing'}</Text></View></View>
+        <View style={detail.summaryTop}><Text numberOfLines={1} style={detail.summaryMeta}>{transaction?.postedLabel ?? ''} · {transaction?.bankAccountNumber ?? 'No account'}</Text><View style={[detail.summaryBadge, !attached && detail.summaryBadgeMissing]}>{attached && <Text style={detail.summaryCheck}>✓</Text>}<Text style={[detail.summaryBadgeText, !attached && detail.summaryBadgeTextMissing]}>{attached ? 'Bill attached' : 'Bill missing'}</Text></View></View>
         <Text style={detail.summaryAmount}>{money(transaction?.amount ?? 0)}</Text>
         <SummaryMarquee text={transaction?.merchant ?? 'Transaction'} style={detail.summaryMerchant} />
         <SummaryMarquee text={transaction?.description ?? ''} style={detail.summaryRemark} scrollAfter={42} />
@@ -2621,37 +2628,19 @@ function TransactionDetails({ transaction, token, onChanged, onBack, openCategor
         {memo.endsWith('/') && <View style={detail.memoMenu}>{MEMO_SHORTCUTS.map((item) => <Pressable key={item} onPress={() => setMemo(item)} style={detail.memoOption}><Text style={detail.memoOptionText}>{item}</Text></Pressable>)}</View>}
       </View>
       <View style={detail.billPanel}>
-        <Text style={detail.billTitle}>Bill</Text>
-        {attached && !pendingBill && !!transaction?.billMappedBy && <View style={[detail.mapStamp, aiMatched && detail.mapStampAi]}>
-          <View style={[detail.mapStampIcon, aiMatched && detail.mapStampIconAi]}>{aiMatched ? <Sparkles size={20} color="#FFF" /> : <Text style={detail.mapStampCheck}>✓</Text>}</View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={[detail.mapStampLabel, aiMatched && detail.mapStampLabelAi]}>{aiMatched ? 'AUTO-MATCHED' : 'MATCHED'}</Text>
-            <Text style={[detail.mapStampTitle, aiMatched && detail.mapStampTitleAi]}>{aiMatched ? 'Matched automatically by System' : `Matched by ${transaction.billMappedBy}`}</Text>
-            {!!transaction.billMappedAt && <Text numberOfLines={1} style={detail.mapStampSub}>{new Date(transaction.billMappedAt).toLocaleString('en-CA', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</Text>}
-          </View>
-        </View>}
-        <Pressable onPress={chooseBill} style={detail.billFile}><View style={detail.fileIcon}><FileText size={28} color="#A2AECB" /></View><View style={detail.fileInfo}><Text numberOfLines={1} style={detail.fileName}>{pendingBill?.name ?? readableBillName(transaction?.billName) ?? 'Upload bill'}</Text><Text numberOfLines={1} adjustsFontSizeToFit style={detail.fileMeta}>{pendingBill ? 'Ready to save to this transaction only' : transaction?.billSizeBytes ? `${Math.round(transaction.billSizeBytes / 1024)} KB · Uploaded by ${transaction.billUploadedBy ?? 'you'}` : 'Take a photo or choose from gallery'}</Text></View>{!(attached && aiMatched && !pendingBill) && <View style={[detail.fileBadge, !attached && { backgroundColor: '#FDEBEC' }, attached && aiMatched && !pendingBill && { backgroundColor: '#EFEAFE' }]}>{attached && !pendingBill && (aiMatched ? <Sparkles size={14} color="#6D4AE0" /> : <Text style={detail.fileCheck}>✓</Text>)}<Text style={[detail.fileBadgeText, (!attached || pendingBill) && { color: '#D9363E' }, attached && aiMatched && !pendingBill && { color: '#6D4AE0' }]}>{pendingBill ? 'Ready' : attached ? (aiMatched ? 'AI matched' : 'Matched') : 'Upload'}</Text></View>}</Pressable>
-        {!attached && loadingBills && !availableBills.length && <BillOptionsSkeleton />}
-        {!attached && availableBills.length > 0 && <>
-          <Text style={detail.thumbHeading}>Uploaded bills · tap one to attach</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={detail.thumbRow}>
-            {availableBills.map((bill) => {
-              const chosen = selectedExistingBillId === bill.id;
-              return <Pressable key={bill.id} onPress={() => { setSelectedExistingBillId(chosen ? '' : bill.id); setPendingBill(null); setMessage(chosen ? '' : 'Existing bill ready to save to this transaction.'); }}
-                style={[detail.thumb, chosen && detail.thumbOn]} accessibilityRole="imagebutton" accessibilityState={{ selected: chosen }} accessibilityLabel={billHeadline(bill)}>
-                {bill.mimeType.startsWith('image/')
-                  ? <AuthImage token={token} url={billFileUrl(bill.id)} cacheKey={`thumb-${bill.id}`} style={detail.thumbImage} />
-                  : <View style={[detail.thumbImage, detail.thumbPdf]}><FileText size={26} color="#8A96AD" /><Text style={detail.thumbPdfText}>PDF</Text></View>}
-                {chosen && <View style={detail.thumbTick}><Check size={13} color="#FFF" strokeWidth={3.5} /></View>}
-              </Pressable>;
-            })}
-          </ScrollView>
-        </>}
+        {/* The file row is only for adding a bill; an attached one shows its stamp and photo. */}
+        {!billLocked && <Pressable onPress={chooseBill} style={detail.billFile}><View style={detail.fileIcon}><FileText size={28} color="#A2AECB" /></View><View style={detail.fileInfo}><Text numberOfLines={1} style={detail.fileName}>{pendingBill?.name ?? readableBillName(transaction?.billName) ?? 'Upload bill'}</Text><Text numberOfLines={1} adjustsFontSizeToFit style={detail.fileMeta}>{pendingBill ? 'Ready to save to this transaction only' : transaction?.billSizeBytes ? `${Math.round(transaction.billSizeBytes / 1024)} KB · Uploaded by ${transaction.billUploadedBy ?? 'you'}` : 'Take a photo or choose from gallery'}</Text></View>{!(attached && aiMatched && !pendingBill) && <View style={[detail.fileBadge, !attached && { backgroundColor: '#FDEBEC' }, attached && aiMatched && !pendingBill && { backgroundColor: '#EFEAFE' }]}>{attached && !pendingBill && (aiMatched ? <Sparkles size={14} color="#6D4AE0" /> : <Text style={detail.fileCheck}>✓</Text>)}<Text style={[detail.fileBadgeText, (!attached || pendingBill) && { color: '#D9363E' }, attached && aiMatched && !pendingBill && { color: '#6D4AE0' }]}>{pendingBill ? 'Ready' : attached ? (aiMatched ? 'AI matched' : 'Matched') : 'Upload'}</Text></View>}</Pressable>}
         {pendingBill?.mimeType?.startsWith('image/') && <Pressable onPress={() => setViewerUri(pendingBill.uri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><LoadingImage uri={pendingBill.uri} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewUri && <Pressable onPress={() => setViewerUri(previewUri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><LoadingImage uri={previewUri} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewError && <Text style={detail.previewError}>{previewError}</Text>}{!pendingBill && previewLoading && !previewUri && <ImageSkeleton height={220} style={{ marginTop: 12 }} />}
       </View>
       {!!message && <Text style={{ color: messageIsSuccess ? '#159148' : '#D9363E', textAlign: 'center', fontWeight: '700', marginTop: 14 }}>{message}</Text>}
       <Pressable onPress={save} disabled={saving || !transaction} style={[detail.save, (!transaction || saving) && { opacity: 0.55 }]}><Text style={detail.saveText}>{saving ? 'Saving…' : 'Save changes'}</Text></Pressable>
-    </ScrollView>{sheet==='category'&&<CategorySheet loading={loadingCategories && !categoryOptions.length} options={categoryOptions} selected={category} onChoose={(value) => void chooseCategory(value)} onClose={()=>setSheet('')}/>}{!!viewerUri&&<ImageViewer uri={viewerUri} onClose={() => setViewerUri('')} />}{billSource&&<UploadOptionsSheet subtitle="Add a bill to this transaction" onClose={() => setBillSource(false)} onCamera={() => void pickBillImage('camera')} onGallery={() => void pickBillImage('gallery')} />}</View>
+    </ScrollView>{sheet==='category'&&<CategorySheet loading={loadingCategories && !categoryOptions.length} options={categoryOptions} selected={category} onChoose={(value) => void chooseCategory(value)} onClose={()=>setSheet('')}/>}{!!viewerUri&&<ImageViewer uri={viewerUri} onClose={() => setViewerUri('')} />}{billSource&&<UploadOptionsSheet subtitle="Add a bill to this transaction" onClose={() => setBillSource(false)}
+      onCamera={() => void pickBillImage('camera')} onGallery={() => void pickBillImage('gallery')}
+      onLibrary={availableBills.length ? () => { setBillSource(false); setBillPicker(true); } : undefined}
+      librarySubtitle={`${availableBills.length} already uploaded`} />}
+    {billPicker && <UploadedBillsSheet token={token} bills={availableBills} selectedId={selectedExistingBillId}
+      onChoose={(billId) => { setSelectedExistingBillId(billId); setPendingBill(null); setMessage('Existing bill ready to save to this transaction.'); setBillPicker(false); }}
+      onClose={() => setBillPicker(false)} />}</View>
   );
 }
 function billHeadline(bill: AvailableBill) {
@@ -2740,6 +2729,9 @@ const detail = StyleSheet.create({
   summaryBadge: { height: 36, borderRadius: 18, paddingHorizontal: 11, backgroundColor: "#315B73", flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 0 },
   summaryCheck: { color: "#6AF0A0", fontSize: 15, fontWeight: "800" },
   summaryBadgeText: { color: "#73F1A4", fontSize: 13, fontWeight: "700" },
+  // Missing bill: the same light red as the "Upload" badge below.
+  summaryBadgeMissing: { backgroundColor: "#FDEBEC" },
+  summaryBadgeTextMissing: { color: "#D9363E" },
   summaryAmount: { color: "#FFF", fontSize: 40, lineHeight: 47, fontWeight: "800", marginTop: 14, letterSpacing: -0.5 },
   summaryMerchant: { color: "#FFF", fontSize: 19, lineHeight: 24, fontWeight: "800", marginTop: 7 },
   summaryRemark: { color: "#BBC6E1", fontSize: 13, lineHeight: 18, marginTop: 4 },
@@ -3096,6 +3088,92 @@ function PhoneGalleryIcon({ size = 32 }: { size?: number }) {
     </G>
   </Svg>;
 }
+
+/** Bills already uploaded for this bank: image, who uploaded it, and when. Tap one to use it. */
+function UploadedBillsSheet({ token, bills, selectedId, onChoose, onClose }: { token: string; bills: AvailableBill[]; selectedId: string; onChoose: (billId: string) => void; onClose: () => void }) {
+  // Tapping a bill opens it full screen first, so the right one can be picked with confidence.
+  const [preview, setPreview] = useState<AvailableBill | null>(null);
+  const [previewUri, setPreviewUri] = useState("");
+  const [previewError, setPreviewError] = useState("");
+  useBackHandler(!!preview, () => setPreview(null));
+  useEffect(() => {
+    if (!preview) { setPreviewUri(""); setPreviewError(""); return; }
+    if (!preview.mimeType.startsWith("image/")) { setPreviewError("This bill is a PDF, so it cannot be shown here."); return; }
+    let active = true;
+    setPreviewUri(""); setPreviewError("");
+    void downloadBillPreview(token, billFileUrl(preview.id), `thumb-${preview.id}`, preview.mimeType)
+      .then((uri) => { if (active) setPreviewUri(uri); })
+      .catch(() => { if (active) setPreviewError("The bill image could not be loaded."); });
+    return () => { active = false; };
+  }, [preview, token]);
+  return <View style={s.overlay}>
+    <Pressable style={s.overlayTap} onPress={onClose} />
+    <SlideUpSheet onClose={onClose} style={uploadOptions.sheet} scrollable>
+      <View style={s.handle} />
+      <View style={uploadOptions.head}>
+        <View style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+          <Text style={uploadOptions.title}>Uploaded bills</Text>
+          <Text numberOfLines={1} style={uploadOptions.subtitle}>{bills.length} {bills.length === 1 ? "bill" : "bills"} waiting for a transaction</Text>
+        </View>
+        <Pressable style={s.close} onPress={onClose}><Text style={s.closeText}>×</Text></Pressable>
+      </View>
+      {bills.map((bill) => {
+        const chosen = bill.id === selectedId;
+        return <Pressable key={bill.id} onPress={() => setPreview(bill)} style={({ pressed }) => [pickerUi.row, chosen && pickerUi.rowOn, pressed && { opacity: 0.75 }]} accessibilityRole="button" accessibilityState={{ selected: chosen }} accessibilityLabel={`View ${billHeadline(bill)}`}>
+          {bill.mimeType.startsWith("image/")
+            ? <AuthImage token={token} url={billFileUrl(bill.id)} cacheKey={`thumb-${bill.id}`} style={pickerUi.thumb} />
+            : <View style={[pickerUi.thumb, pickerUi.pdf]}><FileText size={24} color="#8A96AD" /><Text style={pickerUi.pdfText}>PDF</Text></View>}
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text numberOfLines={1} style={pickerUi.title}>{billHeadline(bill)}</Text>
+            <Text numberOfLines={1} style={pickerUi.sub}>Uploaded by {bill.uploadedBy}</Text>
+            <Text numberOfLines={1} style={pickerUi.sub}>{new Date(bill.createdAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })} · {Math.round(bill.fileSizeBytes / 1024)} KB</Text>
+          </View>
+          {chosen && <View style={pickerUi.tick}><Check size={14} color="#FFF" strokeWidth={3.5} /></View>}
+        </Pressable>;
+      })}
+      {!bills.length && <Text style={pickerUi.empty}>No uploaded bills are waiting for this account.</Text>}
+    </SlideUpSheet>
+    {/* Full screen look at the bill, with the button that attaches it. */}
+    {!!preview && !!previewUri && <ImageViewer uri={previewUri} onClose={() => setPreview(null)} footer={
+      <View style={pickerUi.viewerBar}>
+        <Pressable onPress={() => { onChoose(preview.id); setPreview(null); }} style={({ pressed }) => [pickerUi.useBtn, pressed && { opacity: 0.8 }]} accessibilityRole="button">
+          <Check size={16} color="#FFF" strokeWidth={3} />
+          <Text style={pickerUi.useText}>Use this bill</Text>
+        </Pressable>
+      </View>
+    } />}
+    {!!preview && !previewUri && <View style={pickerUi.loadingWrap}>
+      <Pressable style={s.overlayTap} onPress={() => setPreview(null)} />
+      <View style={pickerUi.loadingCard}>
+        {previewError
+          ? <Text style={pickerUi.loadingText}>{previewError}</Text>
+          : <><Skeleton style={pickerUi.loadingBox}><Bone width="100%" height="100%" radius={16} /></Skeleton><Text style={pickerUi.loadingText}>Opening the bill…</Text></>}
+        {!!previewError && <Pressable onPress={() => { onChoose(preview.id); setPreview(null); }} style={pickerUi.useBtn}><Text style={pickerUi.useText}>Use this bill</Text></Pressable>}
+      </View>
+    </View>}
+  </View>;
+}
+
+const pickerUi = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", gap: 14, padding: 12, borderRadius: 18, borderWidth: 1, borderColor: "#E1E6EF", backgroundColor: "#FFF", marginBottom: 10 },
+  rowOn: { borderColor: "#16A34A", borderWidth: 2, backgroundColor: "#F3FBF6" },
+  thumb: { width: 62, height: 76, borderRadius: 12, backgroundColor: "#F1F3F8" },
+  pdf: { alignItems: "center", justifyContent: "center", gap: 3 },
+  pdfText: { color: "#8A96AD", fontSize: 11, fontWeight: "800" },
+  title: { color: "#17223A", fontSize: 15, fontWeight: "800" },
+  sub: { color: "#71809A", fontSize: 13, marginTop: 2 },
+  tick: { width: 24, height: 24, borderRadius: 12, backgroundColor: "#16A34A", alignItems: "center", justifyContent: "center" },
+  empty: { color: "#71809A", textAlign: "center", paddingVertical: 18 },
+  viewerBar: { position: "absolute", left: 16, top: 52, flexDirection: "row", alignItems: "center" },
+  viewerTitle: { color: "#FFF", fontSize: 15, fontWeight: "800" },
+  viewerSub: { color: "#C8D1E9", fontSize: 12, marginTop: 2 },
+  useBtn: { flexDirection: "row", alignItems: "center", gap: 7, borderRadius: 12, backgroundColor: "#16A34A", paddingHorizontal: 16, paddingVertical: 11 },
+  useText: { color: "#FFF", fontSize: 14, fontWeight: "800" },
+  loadingWrap: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", zIndex: 30, elevation: 30 },
+  loadingCard: { alignItems: "center", gap: 12, borderRadius: 20, backgroundColor: "#FFF", paddingHorizontal: 20, paddingVertical: 20 },
+  loadingBox: { width: 200, height: 260 },
+  loadingText: { color: "#3E4A63", fontSize: 14, fontWeight: "700", textAlign: "center" },
+});
 
 // Grid of every bill uploaded for the selected business. Tap an image to view it full screen.
 function BillGallery({ token, business, onBack, onOpenTransaction }: { token: string; business: { id: string; name: string } | null; onBack: () => void; onOpenTransaction: (transactionId: string) => void }) {
