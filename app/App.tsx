@@ -88,7 +88,7 @@ import {
   Tag,
   Upload,
   UserRound,
-  UsersRound,
+  UsersRound, ImageOff
 } from "lucide-react-native";
 import Svg, { Circle as SvgCircle, ClipPath, Defs, G, RadialGradient as SvgRadialGradient, Line as SvgLine, LinearGradient as SvgLinearGradient, Path, Rect as SvgRect, Stop, Text as SvgText } from "react-native-svg";
 import { BankIcon, MastercardIcon, VisaIcon } from "./src/InstitutionIcons";
@@ -122,6 +122,8 @@ export default function App() {
   const appTop = iosInsets.top ? { paddingTop: Math.max(52, iosInsets.top + 8) } : null;
   // True while a saved session is checked at launch, so the sign-in screen never flashes.
   const [restoring, setRestoring] = useState(true);
+  // Animated logo shown once per launch before the sign-in page (not for signed-in users).
+  const [introDone, setIntroDone] = useState(false);
   // A saved session was found at launch: show Home placeholders while it is checked.
   const [restoringSession, setRestoringSession] = useState(false);
   const [email, setEmail] = useState("");
@@ -464,6 +466,10 @@ export default function App() {
   // Pull-down refresh on the main screens reloads the active business.
   const refreshWorkspace = sessionToken ? async () => { await loadWorkspace(sessionToken, workspace?.activeBusiness?.id); } : undefined;
   const openDetails = (id: string, category = false) => { setOpenCategoryOnDetails(category); setSelectedTransactionId(id); setPage("details"); };
+  // Display only: the intro plays while the saved sign-in is checked and before the sign-in page;
+  // a signed-in user goes straight to the Home placeholder as before.
+  // Same shape as the sign-in return below, so the intro and the page stay mounted across the switch.
+  if (!introDone && restoring && !restoringSession) return <View style={introUi.host}>{null}<LaunchIntro onDone={() => setIntroDone(true)} /></View>;
   if (restoring) return restoringSession
     ? <View style={[s.app, appTop]}><StatusBar style="dark" /><HomeSkeleton /></View>
     : <PageLoader dark label="Opening MediAccounts…" />;
@@ -549,6 +555,7 @@ export default function App() {
     return <><StatusBar style="dark" /><NewTransaction token={sessionToken ?? ""} workspace={workspace} onBack={() => setPage("transactions")} onCreated={() => { haptic.success(); if (sessionToken) void loadWorkspace(sessionToken, workspace?.activeBusiness?.id); setPage("transactions"); }} /></>;
   if (page === "login")
     return (
+      <View style={introUi.host}>
       <Auth
         onGoogle={continueWithGoogle}
         googleBusy={googleBusy}
@@ -558,6 +565,8 @@ export default function App() {
         error={authError}
         onEmail={sendCode}
       />
+      {!introDone && <LaunchIntro onDone={() => setIntroDone(true)} />}
+      </View>
     );
   return (
     <View style={[s.app, appTop]}>
@@ -604,6 +613,8 @@ export default function App() {
       {page === "reports" && dataLoading && <ChartsSkeleton />}
       {page === "reports" && !dataLoading && <Reports workspace={workspace} selectedBankId={selectedBankId} onBusiness={() => setBusinesses(true)} onBank={() => setBankSheet(true)} onBack={() => setPage("more")} />}
       {page === "more" && (
+        // Placeholder rows for a moment when the tab opens, like the other tabs.
+        <OpeningPlaceholder duration={800} placeholder={<MoreSkeleton rows={currentUser?.role === "admin" ? 6 : 5} />}>
         <More
           isAdmin={currentUser?.role === "admin"}
           onLogout={signOut}
@@ -614,6 +625,7 @@ export default function App() {
           onProfile={() => setPage("profile")}
           onShortcuts={() => setQuickActionsOpen("menu")}
         />
+        </OpeningPlaceholder>
       )}
       <Nav page={page === "charts" || page === "reports" ? "more" : page} setPage={setPage} />
       {!!quickActionsOpen && <ShakeShortcutsSheet source={quickActionsOpen} onChoose={(action) => void runQuickAction(action)} onClose={() => setQuickActionsOpen("")} />}
@@ -1574,8 +1586,30 @@ function AuthImage({ token, url, cacheKey, style }: { token: string; url: string
     void downloadBillPreview(token, url, cacheKey.replace(/[^a-z0-9-]/gi, ""), "image/jpeg").then((local) => { if (active) setUri(local); }).catch(() => undefined);
     return () => { active = false; };
   }, [token, url, cacheKey]);
-  return uri ? <Image source={{ uri }} style={style} resizeMode="cover" /> : <View style={[style, { backgroundColor: "#E2E6EE" }]} />;
+  return uri ? <LoadingImage uri={uri} style={style} /> : <View style={[style, loadingImageUi.frame]}><ActivityIndicator size="small" color="#8A96AC" /></View>;
 }
+
+/**
+ * Display only: an image that shows a spinner in its place until the photo has appeared, and an
+ * "image unavailable" icon if it can't be shown, so a slow photo never looks like a blank box.
+ * `style` sizes the frame; the photo fills it.
+ */
+function LoadingImage({ uri, style, resizeMode = "cover", dark = false }: { uri: string; style: any; resizeMode?: "cover" | "contain"; dark?: boolean }) {
+  const [state, setState] = useState<"loading" | "loaded" | "failed">("loading");
+  useEffect(() => { setState("loading"); }, [uri]);
+  return <View style={[style, loadingImageUi.frame, dark && loadingImageUi.dark]}>
+    <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode={resizeMode} onLoad={() => setState("loaded")} onError={() => setState("failed")} />
+    {state !== "loaded" && <View pointerEvents="none" style={loadingImageUi.overlay}>
+      {state === "loading" ? <ActivityIndicator size="small" color={dark ? "#FFF" : "#5C70FF"} /> : <ImageOff size={24} color={dark ? "#C8CFDC" : "#9AA5BB"} />}
+    </View>}
+  </View>;
+}
+
+const loadingImageUi = StyleSheet.create({
+  frame: { backgroundColor: "#EEF1F6", overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  dark: { backgroundColor: "transparent" },
+  overlay: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center" },
+});
 
 /** Building icon in a light tile, shown in lists for a business without a logo. */
 function BusinessIconTile({ size = 40, radius = 12 }: { size?: number; radius?: number }) {
@@ -1952,6 +1986,40 @@ function recentlyAdded(transactions: FinanceTransaction[], limit: number) {
 function transactionSummary(transactions: FinanceTransaction[]) {
   return { spent: transactions.reduce((sum, item) => sum + Math.abs(numberValue(item.amount)), 0), categoryCount: new Set(transactions.map((item) => item.category).filter(Boolean)).size, billsMissing: transactions.filter((item) => item.billStatus === 'missing').length, gstClaimable: transactions.reduce((sum, item) => sum + numberValue(item.gst), 0), transactionCount: transactions.length };
 }
+
+/** The logo fades and grows in, the name follows, then the intro fades away over the sign-in page (2 s). */
+function LaunchIntro({ onDone }: { onDone: () => void }) {
+  const logo = useRef(new Animated.Value(0)).current;
+  const name = useRef(new Animated.Value(0)).current;
+  const fade = useRef(new Animated.Value(1)).current;
+  const done = useRef(onDone);
+  done.current = onDone;
+  useEffect(() => {
+    const animation = Animated.sequence([
+      Animated.timing(logo, { toValue: 1, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(name, { toValue: 1, duration: 400, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.delay(450),
+      Animated.timing(fade, { toValue: 0, duration: 500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]);
+    animation.start(() => done.current());
+    return () => animation.stop();
+  }, []);
+  return <Animated.View pointerEvents="none" style={[introUi.screen, { opacity: fade }]}>
+    <StatusBar style="light" />
+    <Animated.View style={{ opacity: logo, transform: [{ scale: logo.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }] }}>
+      <BrandMark size={96} />
+    </Animated.View>
+    <Animated.View style={[introUi.name, { opacity: name, transform: [{ translateY: name.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] }]}>
+      <BrandWordmark />
+    </Animated.View>
+  </Animated.View>;
+}
+
+const introUi = StyleSheet.create({
+  screen: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "#101A32", alignItems: "center", justifyContent: "center" },
+  name: { marginTop: 22 },
+  host: { flex: 1, backgroundColor: "#101A32" },
+});
 
 function PageLoader({ label = "Loading…", dark = false }: { label?: string; dark?: boolean }) {
   return <View style={[loaderUi.page, dark && loaderUi.pageDark]}>
@@ -2445,7 +2513,7 @@ function ImageViewer({ uri, onClose, footer }: { uri: string; onClose: () => voi
   return <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
     <View style={viewerUi.backdrop}>
       <Animated.View style={[viewerUi.stage, { transform: [{ translateX }, { translateY }, { scale }] }]} {...responder.panHandlers}>
-        <Image source={{ uri }} style={viewerUi.image} resizeMode="contain" />
+        <LoadingImage uri={uri} style={viewerUi.image} resizeMode="contain" dark />
       </Animated.View>
       <Pressable onPress={onClose} style={viewerUi.close} hitSlop={10} accessibilityLabel="Close photo"><Text style={viewerUi.closeText}>×</Text></Pressable>
       <Text pointerEvents="none" style={viewerUi.hint}>Pinch to zoom · double-tap to zoom in or out</Text>
@@ -2579,7 +2647,7 @@ function TransactionDetails({ transaction, token, onChanged, onBack, openCategor
             })}
           </ScrollView>
         </>}
-        {pendingBill?.mimeType?.startsWith('image/') && <Pressable onPress={() => setViewerUri(pendingBill.uri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><Image source={{ uri: pendingBill.uri }} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewUri && <Pressable onPress={() => setViewerUri(previewUri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><Image source={{ uri: previewUri }} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewError && <Text style={detail.previewError}>{previewError}</Text>}{!pendingBill && previewLoading && !previewUri && <ImageSkeleton height={220} style={{ marginTop: 12 }} />}
+        {pendingBill?.mimeType?.startsWith('image/') && <Pressable onPress={() => setViewerUri(pendingBill.uri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><LoadingImage uri={pendingBill.uri} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewUri && <Pressable onPress={() => setViewerUri(previewUri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><LoadingImage uri={previewUri} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}{!pendingBill && !!previewError && <Text style={detail.previewError}>{previewError}</Text>}{!pendingBill && previewLoading && !previewUri && <ImageSkeleton height={220} style={{ marginTop: 12 }} />}
       </View>
       {!!message && <Text style={{ color: messageIsSuccess ? '#159148' : '#D9363E', textAlign: 'center', fontWeight: '700', marginTop: 14 }}>{message}</Text>}
       <Pressable onPress={save} disabled={saving || !transaction} style={[detail.save, (!transaction || saving) && { opacity: 0.55 }]}><Text style={detail.saveText}>{saving ? 'Saving…' : 'Save changes'}</Text></Pressable>
@@ -2911,7 +2979,7 @@ function UploadBill({ token, workspace, transactions, selectedBankId, preferredT
             })}
           </ScrollView>
         </>}
-        {file?.mimeType?.startsWith('image/') && <Pressable onPress={() => setViewerUri(file.uri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><Image source={{ uri: file.uri }} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}
+        {file?.mimeType?.startsWith('image/') && <Pressable onPress={() => setViewerUri(file.uri)} accessibilityRole="imagebutton" accessibilityLabel="View bill photo"><LoadingImage uri={file.uri} style={detail.billPreview} resizeMode="contain" /><Text style={detail.previewHint}>Tap photo to view full screen</Text></Pressable>}
         {!file && selectedBill?.mimeType.startsWith('image/') && <AuthImage token={token} url={billFileUrl(selectedBill.id)} cacheKey={`thumb-${selectedBill.id}`} style={detail.billPreview} />}
       </View>
       {!!message && <Text style={{ color: message.includes('matched') ? '#159148' : '#D9363E', textAlign: 'center', fontWeight: '700', marginTop: 16 }}>{message}</Text>}
@@ -3091,8 +3159,8 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
           const thumb = thumbs[bill.id];
           return <Pressable key={bill.id} onPress={() => openBill(bill)} style={({ pressed }) => [galleryUi.cell, pressed && { opacity: 0.75 }]} accessibilityRole="imagebutton" accessibilityLabel={bill.fileName}>
             <View style={galleryUi.tile}>
-              {isImage && thumb ? <Image source={{ uri: thumb }} style={galleryUi.image} resizeMode="cover" />
-                : isImage ? <Skeleton style={StyleSheet.absoluteFill}><Bone height="100%" radius={0} /></Skeleton>
+              {isImage && thumb ? <LoadingImage uri={thumb} style={galleryUi.image} />
+                : isImage ? <View style={StyleSheet.absoluteFill}><Skeleton style={StyleSheet.absoluteFill}><Bone height="100%" radius={0} /></Skeleton><View pointerEvents="none" style={loadingImageUi.overlay}><ActivityIndicator size="small" color="#5C70FF" /></View></View>
                 : <View style={galleryUi.pdf}><FileText size={30} color="#8A96AD" /><Text style={galleryUi.pdfText}>PDF</Text></View>}
               <View style={[galleryUi.badge, bill.transactionId ? galleryUi.badgeOn : galleryUi.badgeOff]}>
                 {bill.transactionId ? <Check size={10} color="#FFF" strokeWidth={3.5} /> : <Text style={galleryUi.badgeDot}>•</Text>}
@@ -3300,7 +3368,7 @@ function UploadBillPage({ token, businesses, defaultBusinessId = "", defaultBank
 
       <Text style={[billUpload.label, billUpload.spaced]}>Upload Bill</Text>
       <Pressable onPress={() => setSheet("source")} style={billUpload.dropzone} accessibilityRole="button" accessibilityLabel="Upload or capture bill">
-        {file && !isPdf ? <Pressable onPress={() => setViewerUri(file.uri)} accessibilityLabel="View bill photo"><Image source={{ uri: file.uri }} style={billUpload.preview} resizeMode="contain" /></Pressable> : <View style={billUpload.dropIcon}>{isPdf ? <FileText size={26} color="#5C70FF" /> : <Camera size={26} color="#6B778F" />}</View>}
+        {file && !isPdf ? <Pressable onPress={() => setViewerUri(file.uri)} accessibilityLabel="View bill photo"><LoadingImage uri={file.uri} style={billUpload.preview} resizeMode="contain" /></Pressable> : <View style={billUpload.dropIcon}>{isPdf ? <FileText size={26} color="#5C70FF" /> : <Camera size={26} color="#6B778F" />}</View>}
         <Text numberOfLines={1} style={billUpload.dropTitle}>{file ? file.name : "Tap to upload or capture bill"}</Text>
         <Text style={billUpload.dropSub}>{file ? "Tap to change the bill" : "Select from gallery or use camera"}</Text>
       </Pressable>
@@ -5396,6 +5464,23 @@ function More({
           );
         })}
       </View>
+    </ScrollView>
+  );
+}
+
+/** Same layout as More: the heading stays, each menu row is a gray placeholder. */
+function MoreSkeleton({ rows }: { rows: number }) {
+  return (
+    <ScrollView contentContainerStyle={s.moreScreen} scrollEnabled={false}>
+      <View style={s.moreHeader}><Text style={s.pageTitle}>More</Text><Text style={s.pageSubtitle}>Manage your business and account</Text></View>
+      <Skeleton style={s.moreList}>
+        {Array.from({ length: rows }, (_, index) => (
+          <View key={index} style={s.moreRow}>
+            <Bone width={44} height={44} radius={14} />
+            <Bone width={index % 2 ? 90 : 120} height={15} style={{ marginLeft: 14 }} />
+          </View>
+        ))}
+      </Skeleton>
     </ScrollView>
   );
 }

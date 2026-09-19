@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Animated, DimensionValue, Easing, RefreshControl, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { ActivityIndicator, Animated, DimensionValue, Easing, RefreshControl, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { haptic } from "./haptics";
 
 // Facebook-style loading placeholders: gray shapes that softly pulse
@@ -169,9 +169,12 @@ export function SheetRowsSkeleton({ count = 6 }: { count?: number }) {
   </Skeleton>;
 }
 
-/** A photo-sized gray box. */
+/** A photo-sized gray box with a spinner, so it reads as "photo loading". */
 export function ImageSkeleton({ height = 220, style }: { height?: number; style?: StyleProp<ViewStyle> }) {
-  return <Skeleton style={style}><Bone height={height} radius={14} /></Skeleton>;
+  return <View style={style}>
+    <Skeleton><Bone height={height} radius={14} /></Skeleton>
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}><ActivityIndicator color="#5C70FF" /></View>
+  </View>;
 }
 
 /** Icon + two lines, used inside a select field while its data loads. */
