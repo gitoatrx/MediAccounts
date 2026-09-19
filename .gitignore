@@ -38,21 +38,26 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders
-/ios
-/android
+/app/ios
+/app/android
 
 # local device capture
 device-current.png
 
 # Local Android build tools and logs
-/.android-sdk/
-/.jdk/
-/.build-tools/
-/.gradle-user-home/
-/.gradle-release*.log
+/app/.android-sdk/
+/app/.jdk/
+/app/.build-tools/
+/app/.gradle-user-home/
+/app/.gradle-release*.log
 
 # Generated build logs, device screenshots, and install packages
 *.log
 /device-*.png
 *.apk
 *.aab
+
+# Backend: secrets, uploaded bills and local files stay out of the repo
+/backend/.env
+/backend/uploads/
+/backend/firebase-service-account.json
