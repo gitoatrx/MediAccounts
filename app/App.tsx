@@ -1587,7 +1587,11 @@ function AuthImage({ token, url, cacheKey, style }: { token: string; url: string
     void downloadBillPreview(token, url, cacheKey.replace(/[^a-z0-9-]/gi, ""), "image/jpeg").then((local) => { if (active) setUri(local); }).catch(() => undefined);
     return () => { active = false; };
   }, [token, url, cacheKey]);
-  return uri ? <LoadingImage uri={uri} style={style} /> : <Skeleton style={[style, loadingImageUi.frame]}><Bone width="100%" height="100%" radius={0} /></Skeleton>;
+  // While the photo downloads: the shimmer box with a spinner on top, so it reads as "loading".
+  return uri ? <LoadingImage uri={uri} style={style} /> : <View style={[style, loadingImageUi.frame]}>
+    <Skeleton style={StyleSheet.absoluteFill}><Bone width="100%" height="100%" radius={0} /></Skeleton>
+    <View pointerEvents="none" style={loadingImageUi.overlay}><ActivityIndicator size="small" color="#5C70FF" /></View>
+  </View>;
 }
 
 /**
@@ -3147,7 +3151,7 @@ function UploadedBillsSheet({ token, bills, selectedId, onChoose, onClose }: { t
       <View style={pickerUi.loadingCard}>
         {previewError
           ? <Text style={pickerUi.loadingText}>{previewError}</Text>
-          : <><Skeleton style={pickerUi.loadingBox}><Bone width="100%" height="100%" radius={16} /></Skeleton><Text style={pickerUi.loadingText}>Opening the bill…</Text></>}
+          : <><View style={pickerUi.loadingBox}><Skeleton style={StyleSheet.absoluteFill}><Bone width="100%" height="100%" radius={16} /></Skeleton><View pointerEvents="none" style={loadingImageUi.overlay}><ActivityIndicator size="large" color="#5C70FF" /></View></View><Text style={pickerUi.loadingText}>Opening the bill…</Text></>}
         {!!previewError && <Pressable onPress={() => { onChoose(preview.id); setPreview(null); }} style={pickerUi.useBtn}><Text style={pickerUi.useText}>Use this bill</Text></Pressable>}
       </View>
     </View>}
