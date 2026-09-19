@@ -85,7 +85,6 @@ import {
   MoreHorizontal,
   ReceiptText,
   Search,
-  SlidersHorizontal,
   Tag,
   Upload,
   UserRound,
@@ -4050,7 +4049,7 @@ function Receipts({ onUpload }: { onUpload: () => void }) {
   );
 }
 function AnalyticsHeader({ title, onBack, onFilter, filterActive = false }: { title: string; onBack: () => void; onFilter: () => void; filterActive?: boolean }) {
-  return <View style={analytics.header}><BackButton onPress={onBack} /><Text style={analytics.title}>{title}</Text><Pressable onPress={onFilter} style={[analytics.headerButton, analytics.filterButton, filterActive && analytics.filterButtonActive]} accessibilityLabel="Filter by date"><SlidersHorizontal size={22} color={filterActive ? "#5C70FF" : "#17223A"} /></Pressable></View>;
+  return <View style={analytics.header}><BackButton onPress={onBack} /><Text style={analytics.title}>{title}</Text><Pressable onPress={onFilter} style={[analytics.headerButton, analytics.filterButton, filterActive && analytics.filterButtonActive]} accessibilityLabel="Filter by date"><Search size={25} color={filterActive ? "#5C70FF" : "#17223A"} /></Pressable></View>;
 }
 
 
