@@ -34,13 +34,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text as RNText,
-  TextInput as RNTextInput,
+  Text,
+  TextInput,
   View,
   useWindowDimensions,
 } from "react-native";
-import { Text, TextInput } from "./src/Text";
-import { svgFont } from "./src/typography";
 import { addBackListener } from "./src/backStack";
 import { useIosInsets } from "./src/safeArea";
 import { Fragment, type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -109,8 +107,8 @@ const BRAND_LOGO = require("./assets/mediaccounts-logo.png");
 
 // The HTML reference uses fixed CSS typography. Keep native screens visually
 // consistent on Android devices that have a larger system font setting.
-(RNText as any).defaultProps = { ...((RNText as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
-(RNTextInput as any).defaultProps = { ...((RNTextInput as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
+(Text as any).defaultProps = { ...((Text as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
+(TextInput as any).defaultProps = { ...((TextInput as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
 
 // The signed-in token, for components that only display protected images (e.g. business logos).
 const sessionTokenStore = { current: "" };
@@ -679,7 +677,7 @@ function GoogleIcon({ size = 28 }: { size?: number }) {
 }
 
 function BrandWordmark({ width = 285, height = 46 }: { width?: number; height?: number }) {
-  return <Svg width={width} height={height} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" {...svgFont(800)} fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
+  return <Svg width={width} height={height} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" fontWeight="800" fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
 }
 
 function BrandMark({ size = 48 }: { size?: number }) {
@@ -4078,7 +4076,7 @@ function CategoryBarChart({ items }: { items: Array<{ name: string; amount: numb
   return <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ marginTop: 18 }}>
     {width > 0 && <Svg width={width} height={height}>
       {ticks.map((tick) => <SvgLine key={tick} x1={left} x2={width - 8} y1={y(tick)} y2={y(tick)} stroke="#E8ECF3" strokeDasharray="4 4" />)}
-      {ticks.map((tick) => <SvgText {...svgFont(400)} key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
+      {ticks.map((tick) => <SvgText key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
       <SvgLine x1={left} x2={width - 8} y1={y(0)} y2={y(0)} stroke="#C9D1DF" />
       {items.map((item, index) => {
         const x = left + slot * index + (slot - barWidth) / 2;
@@ -4087,7 +4085,7 @@ function CategoryBarChart({ items }: { items: Array<{ name: string; amount: numb
         const label = item.name.length > 16 ? `${item.name.slice(0, 15)}…` : item.name;
         return <Fragment key={item.name}>
           <SvgRect x={x} y={barTop} width={barWidth} height={Math.max(1.5, y(0) - barTop)} rx={4} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-          <SvgText {...svgFont(400)} x={cx} y={y(0) + 12} fontSize={10.5} fill="#5B6882" textAnchor="end" transform={`rotate(-45 ${cx} ${y(0) + 12})`}>{label}</SvgText>
+          <SvgText x={cx} y={y(0) + 12} fontSize={10.5} fill="#5B6882" textAnchor="end" transform={`rotate(-45 ${cx} ${y(0) + 12})`}>{label}</SvgText>
         </Fragment>;
       })}
     </Svg>}
@@ -4117,12 +4115,12 @@ function MonthlyLineChart({ items }: { items: Array<{ key: string; label: string
   return <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ marginTop: 18 }}>
     {width > 0 && <Svg width={width} height={height}>
       {ticks.map((tick) => <SvgLine key={tick} x1={left} x2={width - right} y1={y(tick)} y2={y(tick)} stroke="#E8ECF3" strokeDasharray="4 4" />)}
-      {ticks.map((tick) => <SvgText {...svgFont(400)} key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
+      {ticks.map((tick) => <SvgText key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
       <SvgLine x1={left} x2={width - right} y1={y(0)} y2={y(0)} stroke="#C9D1DF" />
       {points.length > 1 && <Path d={path} stroke="#3B82F6" strokeWidth={2.5} fill="none" />}
       {points.map((point, index) => <SvgCircle key={items[index].key} cx={point.x} cy={point.y} r={selected === index ? 7 : 5} fill="#3B82F6" stroke="#FFF" strokeWidth={2} onPress={() => setSelected(selected === index ? null : index)} />)}
       {items.map((item, index) => index % labelEvery === 0 || index === items.length - 1
-        ? <SvgText {...svgFont(400)} key={`m${item.key}`} x={x(index)} y={height - 10} fontSize={11} fill="#5B6882" textAnchor={index === 0 && items.length > 1 ? "start" : index === items.length - 1 && items.length > 1 ? "end" : "middle"}>{item.label}</SvgText>
+        ? <SvgText key={`m${item.key}`} x={x(index)} y={height - 10} fontSize={11} fill="#5B6882" textAnchor={index === 0 && items.length > 1 ? "start" : index === items.length - 1 && items.length > 1 ? "end" : "middle"}>{item.label}</SvgText>
         : null)}
     </Svg>}
     <Text style={analytics.chartHint}>{active ? `${active.label}: ${money(active.amount)}` : "Tap a point to see the month total"}</Text>

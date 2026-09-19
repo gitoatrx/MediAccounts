@@ -51,17 +51,6 @@
           }
         }
       ],
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/Inter_400Regular.ttf",
-            "./assets/fonts/Inter_600SemiBold.ttf",
-            "./assets/fonts/Inter_700Bold.ttf",
-            "./assets/fonts/Inter_800ExtraBold.ttf"
-          ]
-        }
-      ],
       "expo-sharing",
       "./plugins/withHighSamplingRateSensors",
       "./plugins/withIosSceneLifecycle"
