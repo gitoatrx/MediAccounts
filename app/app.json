@@ -51,7 +51,8 @@
         }
       ],
       "expo-sharing",
-      "./plugins/withHighSamplingRateSensors"
+      "./plugins/withHighSamplingRateSensors",
+      "./plugins/withIosSceneLifecycle"
     ]
   }
 }
