@@ -23,7 +23,6 @@ import {
   ActivityIndicator,
   StatusBar as NativeStatusBar,
   Alert,
-  BackHandler,
   Animated,
   Easing,
   Image,
@@ -31,14 +30,19 @@ import {
   Linking,
   Modal,
   PanResponder,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
+  Text as RNText,
+  TextInput as RNTextInput,
   View,
   useWindowDimensions,
 } from "react-native";
+import { Text, TextInput } from "./src/Text";
+import { svgFont } from "./src/typography";
+import { addBackListener } from "./src/backStack";
+import { useIosInsets } from "./src/safeArea";
 import { Fragment, type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
@@ -106,14 +110,17 @@ const BRAND_LOGO = require("./assets/mediaccounts-logo.png");
 
 // The HTML reference uses fixed CSS typography. Keep native screens visually
 // consistent on Android devices that have a larger system font setting.
-(Text as any).defaultProps = { ...((Text as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
-(TextInput as any).defaultProps = { ...((TextInput as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
+(RNText as any).defaultProps = { ...((RNText as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
+(RNTextInput as any).defaultProps = { ...((RNTextInput as any).defaultProps || {}), allowFontScaling: false, maxFontSizeMultiplier: 1 };
 
 // The signed-in token, for components that only display protected images (e.g. business logos).
 const sessionTokenStore = { current: "" };
 
 export default function App() {
   const [page, setPage] = useState("login");
+  // On iPhone the top gap grows to clear the status bar / Dynamic Island; Android keeps 52.
+  const iosInsets = useIosInsets();
+  const appTop = iosInsets.top ? { paddingTop: Math.max(52, iosInsets.top + 8) } : null;
   // True while a saved session is checked at launch, so the sign-in screen never flashes.
   const [restoring, setRestoring] = useState(true);
   // A saved session was found at launch: show Home placeholders while it is checked.
@@ -230,7 +237,7 @@ export default function App() {
       addInstitution: "home", newtransaction: "transactions", gallery: "transactions", upload: "home", transactions: "home",
       receipts: "home", more: "home", charts: "more", reports: "more", code: "login",
     };
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+    const subscription = addBackListener(() => {
       const state = backState.current;
       if (state.rowMenu) { setRowMenu(null); return true; }
       if (state.quickActionsOpen) { setQuickActionsOpen(""); return true; }
@@ -459,11 +466,11 @@ export default function App() {
   const refreshWorkspace = sessionToken ? async () => { await loadWorkspace(sessionToken, workspace?.activeBusiness?.id); } : undefined;
   const openDetails = (id: string, category = false) => { setOpenCategoryOnDetails(category); setSelectedTransactionId(id); setPage("details"); };
   if (restoring) return restoringSession
-    ? <View style={s.app}><StatusBar style="dark" /><HomeSkeleton /></View>
+    ? <View style={[s.app, appTop]}><StatusBar style="dark" /><HomeSkeleton /></View>
     : <PageLoader dark label="Opening MediAccounts…" />;
   if (page === "details")
     return (
-      <View style={s.app}>
+      <View style={[s.app, appTop]}>
         <StatusBar style="dark" />
         {dataLoading ? <DetailsSkeleton /> : <OpeningPlaceholder key={selectedTransactionId ?? "details"} duration={800} placeholder={<DetailsSkeleton />}><TransactionDetails openCategory={openCategoryOnDetails} onCategoryOpened={() => setOpenCategoryOnDetails(false)} transaction={workspace?.transactions.find((item) => item.id === selectedTransactionId) ?? workspace?.transactions[0]} token={sessionToken ?? ""} onChanged={() => sessionToken && void loadWorkspace(sessionToken)} onBack={() => setPage("transactions")} /></OpeningPlaceholder>}
         <Nav page="transactions" setPage={setPage} />
@@ -471,7 +478,7 @@ export default function App() {
     );
   if (page === "gallery")
     return (
-      <View style={s.app}>
+      <View style={[s.app, appTop]}>
         <StatusBar style="dark" />
         <BillGallery token={sessionToken ?? ""} business={(workspace?.businesses ?? authBusinesses).find((item) => item.id === galleryBusinessId) ?? workspace?.activeBusiness ?? null} onBack={() => setPage(previousPage.current === "upload" ? "upload" : "transactions")} onOpenTransaction={(id) => openDetails(id)} />
         <Nav page="transactions" setPage={setPage} />
@@ -479,7 +486,7 @@ export default function App() {
     );
   if (page === "uploadBill")
     return (
-      <View style={s.app}>
+      <View style={[s.app, appTop]}>
         <StatusBar style="dark" />
         {dataLoading ? <DetailsSkeleton /> : <UploadBill token={sessionToken ?? ""} workspace={workspace} transactions={(workspace?.transactions ?? []).filter((item) => !selectedBankId || item.bankAccountId === selectedBankId)} selectedBankId={selectedBankId} preferredTransactionId={selectedTransactionId} initialFile={pendingBillFile} onChooseMedia={chooseBillMedia} onSaved={(matchedTransactionId) => { haptic.success(); setPendingBillFile(null); setSelectedTransactionId(matchedTransactionId); if (sessionToken) void loadWorkspace(sessionToken, workspace?.activeBusiness?.id); setPage("details"); }} onBack={() => setPage(selectedTransactionId ? "details" : "home")} />}
         <Nav page="home" setPage={setPage} />
@@ -487,7 +494,7 @@ export default function App() {
     );
   if (page === "team")
     return (
-      <View style={s.app}>
+      <View style={[s.app, appTop]}>
         <StatusBar style="dark" />
         <Team token={sessionToken ?? ""} businesses={workspace?.businesses ?? authBusinesses} onBack={() => setPage("more")} onAdd={() => setPage("addUser")} />
         <Nav page="more" setPage={setPage} />
@@ -495,18 +502,18 @@ export default function App() {
     );
   if (page === "addUser")
     return (
-      <View style={s.app}>
+      <View style={[s.app, appTop]}>
         <StatusBar style="dark" />
         <AddUser token={sessionToken ?? ""} businesses={authBusinesses} onBack={() => setPage("team")} onSaved={() => { haptic.success(); setPage("team"); }} />
         <Nav page="more" setPage={setPage} />
       </View>
     );
   if (page === "profile")
-    return <View style={s.app}><StatusBar style="dark" /><ProfilePage token={sessionToken ?? ''} user={currentUser} onUpdated={(user) => setCurrentUser(user)} onBack={() => setPage("more")} /><Nav page="more" setPage={setPage} /></View>;
+    return <View style={[s.app, appTop]}><StatusBar style="dark" /><ProfilePage token={sessionToken ?? ''} user={currentUser} onUpdated={(user) => setCurrentUser(user)} onBack={() => setPage("more")} /><Nav page="more" setPage={setPage} /></View>;
   if (page === "businesses")
-    return <View style={s.app}><StatusBar style="dark" /><BusinessesPage canManage switching={dataLoading} onChanged={(deletedBusinessId) => { if (sessionToken) void loadWorkspace(sessionToken, workspace?.activeBusiness?.id === deletedBusinessId ? undefined : workspace?.activeBusiness?.id); }} token={sessionToken ?? ""} workspace={workspace} businesses={workspace?.businesses ?? authBusinesses} onSelect={(businessId) => { if (sessionToken) void loadWorkspace(sessionToken, businessId); }} onBack={() => setPage("more")} onAdd={() => setPage("newbiz")} /><Nav page="more" setPage={setPage} /></View>;
+    return <View style={[s.app, appTop]}><StatusBar style="dark" /><BusinessesPage canManage switching={dataLoading} onChanged={(deletedBusinessId) => { if (sessionToken) void loadWorkspace(sessionToken, workspace?.activeBusiness?.id === deletedBusinessId ? undefined : workspace?.activeBusiness?.id); }} token={sessionToken ?? ""} workspace={workspace} businesses={workspace?.businesses ?? authBusinesses} onSelect={(businessId) => { if (sessionToken) void loadWorkspace(sessionToken, businessId); }} onBack={() => setPage("more")} onAdd={() => setPage("newbiz")} /><Nav page="more" setPage={setPage} /></View>;
   if (page === "addInstitution")
-    return <View style={s.app}><StatusBar style="dark" /><AddInstitution token={sessionToken ?? ''} business={workspace?.activeBusiness ?? null} footerOffset={124} onBack={() => setPage('home')} onSaved={async () => { haptic.success(); if (sessionToken) await loadWorkspace(sessionToken, workspace?.activeBusiness?.id); setPage('home'); }} /><Nav page="home" setPage={setPage} /></View>;
+    return <View style={[s.app, appTop]}><StatusBar style="dark" /><AddInstitution token={sessionToken ?? ''} business={workspace?.activeBusiness ?? null} footerOffset={124} onBack={() => setPage('home')} onSaved={async () => { haptic.success(); if (sessionToken) await loadWorkspace(sessionToken, workspace?.activeBusiness?.id); setPage('home'); }} /><Nav page="home" setPage={setPage} /></View>;
   if (page === "code")
     return (
       <Otp
@@ -554,7 +561,7 @@ export default function App() {
       />
     );
   return (
-    <View style={s.app}>
+    <View style={[s.app, appTop]}>
       <StatusBar style="dark" />
       {page === "home" && dataLoading && <HomeSkeleton />}
       {page === "home" && !dataLoading && (
@@ -673,7 +680,7 @@ function GoogleIcon({ size = 28 }: { size?: number }) {
 }
 
 function BrandWordmark({ width = 285, height = 46 }: { width?: number; height?: number }) {
-  return <Svg width={width} height={height} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" fontWeight="800" fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
+  return <Svg width={width} height={height} viewBox="0 0 285 46"><Defs><SvgLinearGradient id="brandWordmark" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#FFFFFF"/><Stop offset="1" stopColor="#8492FF"/></SvgLinearGradient></Defs><SvgText x="142.5" y="35" textAnchor="middle" fontSize="34" {...svgFont(800)} fill="url(#brandWordmark)">MediAccounts</SvgText></Svg>;
 }
 
 function BrandMark({ size = 48 }: { size?: number }) {
@@ -2069,7 +2076,7 @@ function TransactionRow({ item, last, onPress, onLongPress }: { item: FinanceTra
 // title ↔ amount on the first line, date · category ↔ bill badge on the second.
 function TransactionLines({ title, amount, meta, hasBill, amountStyle }: { title: ReactNode; amount: string; meta: string; hasBill: boolean; amountStyle?: any }) {
   return <View style={ui.linesWrap}>
-    <View style={ui.line}>
+    <View style={[ui.line, ui.lineFirst]}>
       <View style={ui.lineLeft}>{title}</View>
       <View style={ui.lineRight}><Text numberOfLines={1} style={[ui.homeAmount, ui.lineAmount, amountStyle]}>{amount}</Text></View>
     </View>
@@ -2290,15 +2297,17 @@ const ui = StyleSheet.create({
     color: "#68758E",
   },
   homeTransactionList: { borderWidth: 1, borderColor: "#E2E6EF", borderRadius: 22, backgroundColor: "#FFF", overflow: "hidden" },
-  homeTransactionRow: { minHeight: 76, paddingHorizontal: 20, paddingVertical: 12, flexDirection: "row", alignItems: "center" },
+  homeTransactionRow: { minHeight: 72, paddingHorizontal: 20, paddingVertical: 12, flexDirection: "row", alignItems: "center" },
   linesWrap: { flex: 1, minWidth: 0 },
-  // Both lines share the same fixed heights so the right column lines up exactly with the left.
+  // Fixed line heights keep the right column lined up exactly with the left. The first line is
+  // tighter so the remark sits close to its date · category line.
   line: { flexDirection: "row", alignItems: "center", height: 26 },
-  lineSecond: { marginTop: 4 },
+  lineFirst: { height: 22 },
+  lineSecond: { marginTop: 0 },
   lineLeft: { flex: 1, minWidth: 0, marginRight: 10, justifyContent: "center" },
   lineRight: { width: 112, alignItems: "flex-end", justifyContent: "center", flexShrink: 0 },
-  lineAmount: { lineHeight: 26 },
-  lineMeta: { color: "#8B98B0", fontSize: 14, lineHeight: 26 },
+  lineAmount: { lineHeight: 22 },
+  lineMeta: { color: "#8B98B0", fontSize: 14, lineHeight: 20 },
   lineBadge: { marginTop: 0 },
   homeTransactionBorder: { borderBottomWidth: 1, borderColor: "#E9EDF3" },
   homeBillIcon: { width: 48, height: 50, borderRadius: 15, backgroundColor: "#14203B", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0, alignSelf: "center" },
@@ -3031,6 +3040,8 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
   useBackHandler(!!open, () => setOpen(null));
   useMessageHaptic(error, true);
   const businessId = business?.id ?? "";
+  // Only bills still waiting for a transaction; matched ones live on their transaction.
+  const shown = useMemo(() => bills.filter((bill) => bill.source !== "transaction" && !bill.transactionId), [bills]);
   const load = async () => {
     if (!businessId || !token) return;
     try { const result = await getBillGallery(token, businessId); setBills(result.bills); setError(""); }
@@ -3046,7 +3057,7 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
   // Protected images are downloaded to the app cache (Android Image cannot send the auth header).
   useEffect(() => {
     let active = true;
-    const missing = bills.filter((bill) => bill.mimeType.startsWith("image/") && !thumbs[bill.id]);
+    const missing = shown.filter((bill) => bill.mimeType.startsWith("image/") && !thumbs[bill.id]);
     void (async () => {
       for (const bill of missing) {
         try {
@@ -3057,9 +3068,7 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
       }
     })();
     return () => { active = false; };
-  }, [bills, token]);
-  // All bills in one list, newest first; the corner badge shows matched (✓) or waiting (•).
-  const shown = bills;
+  }, [shown, token]);
   // A waiting bill is served from /bills, one already on a transaction from that transaction.
   const billUrlOf = (bill: GalleryBill) => bill.source === 'transaction' ? transactionBillFileUrl(bill.id) : billFileUrl(bill.id);
   const openBill = (bill: GalleryBill) => setOpen(bill);
@@ -3071,7 +3080,7 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
         <BackButton onPress={onBack} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={galleryUi.title}>Bill gallery</Text>
-          <Text numberOfLines={1} style={galleryUi.subtitle}>{business?.name ?? "No business selected"} · {bills.length} {bills.length === 1 ? "bill" : "bills"}</Text>
+          <Text numberOfLines={1} style={galleryUi.subtitle}>{business?.name ?? "No business selected"} · {shown.length} {shown.length === 1 ? "unmatched bill" : "unmatched bills"}</Text>
         </View>
       </View>
       {!!error && <Text style={galleryUi.error}>{error}</Text>}
@@ -3097,8 +3106,8 @@ function BillGallery({ token, business, onBack, onOpenTransaction }: { token: st
       </View>}
       {!loading && !shown.length && !error && <View style={galleryUi.empty}>
         <Images size={40} color="#B3BCCD" />
-        <Text style={galleryUi.emptyTitle}>No bills uploaded yet</Text>
-        <Text style={galleryUi.emptySub}>Bills you upload for this business will show here.</Text>
+        <Text style={galleryUi.emptyTitle}>{bills.length ? "All bills are matched" : "No bills uploaded yet"}</Text>
+        <Text style={galleryUi.emptySub}>{bills.length ? "Bills waiting for a transaction will show here." : "Bills you upload for this business will show here."}</Text>
       </View>}
     </ScrollView>
     {open && (openUri ? <ImageViewer uri={openUri} onClose={() => setOpen(null)} footer={
@@ -3445,10 +3454,7 @@ function AllTransactions({ transactions, onDetails, onLongPress, onRefresh, onGa
       <ScrollView refreshControl={refreshControl} contentContainerStyle={transactionUi.screen} onScroll={list.onScroll} scrollEventThrottle={150} showsVerticalScrollIndicator={false}>
         <View style={transactionUi.titleRow}>
           {!!onBack && <BackButton onPress={onBack} label="Back to home" />}
-          <View style={{ flex: 1, marginLeft: onBack ? 14 : 0 }}>
-            <Text style={transactionUi.title}>Transactions</Text>
-            <Text style={transactionUi.titleHint}>Tap to open · long press for quick actions</Text>
-          </View>
+          <Text numberOfLines={1} style={[transactionUi.title, { flex: 1, marginLeft: onBack ? 14 : 0 }]}>Transactions</Text>
           <View style={transactionUi.tools}>
             {onGallery && <Pressable onPress={onGallery} hitSlop={8} style={({ pressed }) => [transactionUi.galleryIcon, pressed && { opacity: 0.7, transform: [{ scale: 0.94 }] }]} accessibilityRole="button" accessibilityLabel="Bill gallery">
               <View style={transactionUi.galleryTile}><ImageIcon size={24} color="#FFF" strokeWidth={2.2} /></View>
@@ -3518,33 +3524,54 @@ function DateFilter({ value, onApply, onClose }: { value: DateRange | null; onAp
     if (from > to) { setError("The From date must be before the To date."); return; }
     onApply({ label: `${formatDate(from)} → ${formatDate(to)}`, from: ymd(from), to: ymd(to) });
   };
+  // To can't be before From (and the other way round), and neither can be in the future.
+  const today = new Date();
+  const pickerValue = (picker === "from" ? fromDate : toDate) ?? (picker === "to" && fromDate ? fromDate : today);
+  const pickerMin = picker === "to" ? fromDate : undefined;
+  const pickerMax = picker === "from" && toDate ? toDate : today;
+  const calendarOnly = !!picker && Platform.OS === "ios";
+  const choose = (date?: Date) => {
+    const which = picker;
+    setPicker("");
+    if (!date) return;
+    setError("");
+    if (which === "from") setFromDate(date); else setToDate(date);
+  };
   return (
     <View style={transactionUi.overlay}>
       <Pressable onPress={onClose} style={transactionUi.overlayTap} />
       <SlideUpSheet onClose={onClose} style={transactionUi.filterSheet} scrollable>
         <View style={transactionUi.handle} />
         <View style={transactionUi.filterHead}>
-          <Text style={transactionUi.filterTitle}>Filter by date</Text>
-          <Pressable onPress={onClose} style={transactionUi.close}>
+          <Text style={transactionUi.filterTitle}>{calendarOnly ? (picker === "from" ? "From date" : "To date") : "Filter by date"}</Text>
+          <Pressable onPress={calendarOnly ? () => setPicker("") : onClose} style={transactionUi.close}>
             <Text style={transactionUi.closeText}>×</Text>
           </Pressable>
         </View>
-        <View style={transactionUi.dateInputs}>
-          <Pressable onPress={() => setPicker("from")} style={transactionUi.dateInput}>
-            <Text style={transactionUi.dateLabel}>FROM</Text>
-            <Text style={transactionUi.dateValue}>{formatDate(fromDate)}</Text>
+        {/* iOS: picking a date shows only the calendar, then returns to From/To.
+            Android opens its own calendar dialog over this panel instead. */}
+        {calendarOnly ? (
+          <View style={transactionUi.calendarWrap}>
+            <DateTimePicker value={pickerValue} mode="date" display="inline" themeVariant="light" accentColor="#5C70FF" minimumDate={pickerMin} maximumDate={pickerMax} onChange={(_, date) => choose(date)} />
+          </View>
+        ) : <>
+          <View style={transactionUi.dateInputs}>
+            <Pressable onPress={() => setPicker("from")} style={transactionUi.dateInput}>
+              <Text style={transactionUi.dateLabel}>FROM</Text>
+              <Text style={[transactionUi.dateValue, !fromDate && transactionUi.datePlaceholder]}>{formatDate(fromDate)}</Text>
+            </Pressable>
+            <Text style={transactionUi.arrow}>→</Text>
+            <Pressable onPress={() => setPicker("to")} style={transactionUi.dateInput}>
+              <Text style={transactionUi.dateLabel}>TO</Text>
+              <Text style={[transactionUi.dateValue, !toDate && transactionUi.datePlaceholder]}>{formatDate(toDate)}</Text>
+            </Pressable>
+          </View>
+          {!!error && <Text style={transactionUi.filterError}>{error}</Text>}
+          <Pressable onPress={apply} style={transactionUi.applyFull}>
+            <Text style={transactionUi.applyText}>Apply</Text>
           </Pressable>
-          <Text style={transactionUi.arrow}>→</Text>
-          <Pressable onPress={() => setPicker("to")} style={transactionUi.dateInput}>
-            <Text style={transactionUi.dateLabel}>TO</Text>
-            <Text style={transactionUi.dateValue}>{formatDate(toDate)}</Text>
-          </Pressable>
-        </View>
-        {!!error && <Text style={transactionUi.filterError}>{error}</Text>}
-        <Pressable onPress={apply} style={transactionUi.applyFull}>
-          <Text style={transactionUi.applyText}>Apply</Text>
-        </Pressable>
-        {!!picker && <DateTimePicker value={picker === "from" ? (fromDate || new Date()) : (toDate || new Date())} mode="date" display="calendar" onChange={(_, date) => { const which = picker; setPicker(""); if (!date) return; setError(""); if (which === "from") setFromDate(date); else setToDate(date); }} />}
+        </>}
+        {!!picker && Platform.OS !== "ios" && <DateTimePicker value={pickerValue} mode="date" display="calendar" minimumDate={pickerMin} maximumDate={pickerMax} onChange={(_, date) => choose(date)} />}
       </SlideUpSheet>
     </View>
   );
@@ -3608,14 +3635,13 @@ const transactionUi = StyleSheet.create({
   galleryTile: { width: 50, height: 50, borderRadius: 15, backgroundColor: "#14203B", alignItems: "center", justifyContent: "center" },
   screen: { padding: 16, paddingTop: 18, paddingBottom: 112 },
   titleRow: {
-    height: 62,
+    height: 54,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 2,
   },
   title: { fontSize: 25, fontWeight: "800", color: "#17223A" },
-  titleHint: { fontSize: 14, color: "#8290A8", marginTop: 3 },
   rangeBar: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#EEF0FF", borderWidth: 1, borderColor: "#D9DEFF", borderRadius: 12, paddingVertical: 7, paddingLeft: 12, paddingRight: 6, marginBottom: 12 },
   rangeText: { flex: 1, fontSize: 14, fontWeight: "700", color: "#17223A" },
   rangeCount: { color: "#5C6B87", fontWeight: "600" },
@@ -3673,6 +3699,8 @@ const transactionUi = StyleSheet.create({
   dateInputs: { flexDirection: "row", alignItems: "center", gap: 8 },
   dateInput: { flex: 1, minHeight: 52, borderRadius: 12, backgroundColor: "#F7F8FB", borderWidth: 1, borderColor: "#E1E6EF", paddingHorizontal: 12, paddingVertical: 8, justifyContent: "center" },
   dateLabel: { fontSize: 11, fontWeight: "700", letterSpacing: 0.6, color: "#98A4BA" },
+  datePlaceholder: { color: "#A9B3C6", fontWeight: "400" },
+  calendarWrap: { borderRadius: 14, borderWidth: 1, borderColor: "#E1E6EF", backgroundColor: "#FFF", overflow: "hidden" },
   dateValue: { fontSize: 15, fontWeight: "600", color: "#17223A", marginTop: 2 },
   arrow: { fontSize: 18, color: "#95A1B8" },
   applyText: { fontSize: 16, fontWeight: "800", color: "#FFF" },
@@ -4051,7 +4079,7 @@ function CategoryBarChart({ items }: { items: Array<{ name: string; amount: numb
   return <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ marginTop: 18 }}>
     {width > 0 && <Svg width={width} height={height}>
       {ticks.map((tick) => <SvgLine key={tick} x1={left} x2={width - 8} y1={y(tick)} y2={y(tick)} stroke="#E8ECF3" strokeDasharray="4 4" />)}
-      {ticks.map((tick) => <SvgText key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
+      {ticks.map((tick) => <SvgText {...svgFont(400)} key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
       <SvgLine x1={left} x2={width - 8} y1={y(0)} y2={y(0)} stroke="#C9D1DF" />
       {items.map((item, index) => {
         const x = left + slot * index + (slot - barWidth) / 2;
@@ -4060,7 +4088,7 @@ function CategoryBarChart({ items }: { items: Array<{ name: string; amount: numb
         const label = item.name.length > 16 ? `${item.name.slice(0, 15)}…` : item.name;
         return <Fragment key={item.name}>
           <SvgRect x={x} y={barTop} width={barWidth} height={Math.max(1.5, y(0) - barTop)} rx={4} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-          <SvgText x={cx} y={y(0) + 12} fontSize={10.5} fill="#5B6882" textAnchor="end" transform={`rotate(-45 ${cx} ${y(0) + 12})`}>{label}</SvgText>
+          <SvgText {...svgFont(400)} x={cx} y={y(0) + 12} fontSize={10.5} fill="#5B6882" textAnchor="end" transform={`rotate(-45 ${cx} ${y(0) + 12})`}>{label}</SvgText>
         </Fragment>;
       })}
     </Svg>}
@@ -4090,12 +4118,12 @@ function MonthlyLineChart({ items }: { items: Array<{ key: string; label: string
   return <View onLayout={(event) => setWidth(event.nativeEvent.layout.width)} style={{ marginTop: 18 }}>
     {width > 0 && <Svg width={width} height={height}>
       {ticks.map((tick) => <SvgLine key={tick} x1={left} x2={width - right} y1={y(tick)} y2={y(tick)} stroke="#E8ECF3" strokeDasharray="4 4" />)}
-      {ticks.map((tick) => <SvgText key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
+      {ticks.map((tick) => <SvgText {...svgFont(400)} key={`l${tick}`} x={left - 6} y={y(tick) + 4} fontSize={11} fill="#8A96AC" textAnchor="end">{compactMoney(tick)}</SvgText>)}
       <SvgLine x1={left} x2={width - right} y1={y(0)} y2={y(0)} stroke="#C9D1DF" />
       {points.length > 1 && <Path d={path} stroke="#3B82F6" strokeWidth={2.5} fill="none" />}
       {points.map((point, index) => <SvgCircle key={items[index].key} cx={point.x} cy={point.y} r={selected === index ? 7 : 5} fill="#3B82F6" stroke="#FFF" strokeWidth={2} onPress={() => setSelected(selected === index ? null : index)} />)}
       {items.map((item, index) => index % labelEvery === 0 || index === items.length - 1
-        ? <SvgText key={`m${item.key}`} x={x(index)} y={height - 10} fontSize={11} fill="#5B6882" textAnchor={index === 0 && items.length > 1 ? "start" : index === items.length - 1 && items.length > 1 ? "end" : "middle"}>{item.label}</SvgText>
+        ? <SvgText {...svgFont(400)} key={`m${item.key}`} x={x(index)} y={height - 10} fontSize={11} fill="#5B6882" textAnchor={index === 0 && items.length > 1 ? "start" : index === items.length - 1 && items.length > 1 ? "end" : "middle"}>{item.label}</SvgText>
         : null)}
     </Svg>}
     <Text style={analytics.chartHint}>{active ? `${active.label}: ${money(active.amount)}` : "Tap a point to see the month total"}</Text>
@@ -4377,6 +4405,7 @@ type BusinessEditor =
   | { kind: "institution"; business: AuthSession['businesses'][number] };
 
 function BusinessesPage({ token, workspace, businesses, canManage, switching = false, onSelect, onChanged, onBack, onAdd }: { switching?: boolean; token: string; workspace: Workspace | null; businesses: AuthSession['businesses']; canManage: boolean; onSelect: (businessId: string) => void; onChanged: (deletedBusinessId?: string) => void; onBack: () => void; onAdd: () => void }) {
+  const { top: iosTop } = useIosInsets();
   const [accountsByBusiness, setAccountsByBusiness] = useState<Record<string, Workspace['bankAccounts']>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -4487,7 +4516,7 @@ function BusinessesPage({ token, workspace, businesses, canManage, switching = f
       {!loading && !businesses.length && <Text style={{ textAlign: "center", color: "#71809A", marginTop: 36 }}>No businesses yet.</Text>}
     </ScrollView>
     {editor?.kind === "business" && <EditBusinessForm token={token} businessId={editor.businessId} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); changed(); }} />}
-    {editor?.kind === "institution" && <View style={bizUi.overlayPage}><AddInstitution token={token} business={editor.business} hideBusiness onBack={() => setEditor(null)} onSaved={async () => { setEditor(null); changed(); }} /></View>}
+    {editor?.kind === "institution" && <View style={[bizUi.overlayPage, iosTop > 0 && { paddingTop: iosTop }]}><AddInstitution token={token} business={editor.business} hideBusiness onBack={() => setEditor(null)} onSaved={async () => { setEditor(null); changed(); }} /></View>}
     {editor?.kind === "account" && <EditAccountForm token={token} businessId={editor.businessId} account={editor.account} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); changed(); }} />}
     {confirmDelete && <View style={s.overlay}>
       <Pressable style={s.overlayTap} onPress={() => !deleting && setConfirmDelete(null)} />
@@ -4507,7 +4536,9 @@ function BusinessesPage({ token, workspace, businesses, canManage, switching = f
 // ---- Shared form building blocks for the business management screens ----
 function FormScreen({ title, onClose, children, footer, overlay }: { title: string; onClose: () => void; children: any; footer: any; overlay?: any }) {
   const keyboardScroll = useKeyboardScroll(useRef<ScrollView>(null));
-  return <View style={pageForm.screen}>
+  // Full-screen form: starts below the iPhone status bar.
+  const { top } = useIosInsets();
+  return <View style={[pageForm.screen, top > 0 && { paddingTop: top }]}>
     <View style={billUpload.header}>
       <BackButton onPress={onClose} label="Back" />
       <Text style={billUpload.title}>{title}</Text>
@@ -5025,7 +5056,7 @@ function Team({ onBack, onAdd, token, businesses }: { token: string; businesses:
   const [loadingUsers, setLoadingUsers] = useState(true);
   useMessageHaptic(loadError, true);
   const refreshControl = usePullRefresh(() => getUsers(token).then((result) => { setUsers(result.users); setLoadError(''); }).catch((error) => setLoadError(error instanceof Error ? error.message : 'Unable to load users.')));
-  useEffect(() => { setLoadingUsers(true); const startedAt = Date.now(); void getUsers(token).then(async (result) => { await new Promise((resolve) => setTimeout(resolve, Math.max(0, 500 - (Date.now() - startedAt)))); setUsers(result.users); }).catch((error) => setLoadError(error instanceof Error ? error.message : 'Unable to load users.')).finally(() => setLoadingUsers(false)); }, [token]);
+  useEffect(() => { setLoadingUsers(true); const startedAt = Date.now(); void getUsers(token).then(async (result) => { await new Promise((resolve) => setTimeout(resolve, Math.max(0, 800 - (Date.now() - startedAt)))); setUsers(result.users); }).catch((error) => setLoadError(error instanceof Error ? error.message : 'Unable to load users.')).finally(() => setLoadingUsers(false)); }, [token]);
   const activeUsers = users.filter((user) => user.isActive);
   const toggleBusiness = async (user: ManagedUser, businessId: string) => {
     const businessIds = user.businesses.some((business) => business.id === businessId)
@@ -5128,6 +5159,8 @@ function AddUser({ token, businesses, onBack, onSaved }: { token: string; busine
   const photoSource = usePhotoSource(setPhoto, "Profile photo");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ text: string; success: boolean } | null>(null);
+  // Placeholder fields for a moment when the page opens, like the other forms.
+  const [opening] = useBriefLoading(800, true);
   useAutoClear(!!toast?.success, toast, () => setToast(null));
   const saveUser = async () => {
     if (!email.trim()) {
@@ -5159,6 +5192,7 @@ function AddUser({ token, businesses, onBack, onSaved }: { token: string; busine
         <BackButton onPress={onBack} />
         <Text style={bizUi.title}>Add user</Text>
       </View>
+      {opening ? <><FormSkeleton fields={3} style={team.form} /><CardListSkeleton count={Math.min(Math.max(businesses.length, 1), 3)} /></> : <>
       <View style={team.form}>
         <Text style={team.formLabel}>Name</Text>
         <TextInput
@@ -5201,6 +5235,7 @@ function AddUser({ token, businesses, onBack, onSaved }: { token: string; busine
       <Text style={team.bottomHelp}>
         They sign in with this email and see only the businesses selected above.
       </Text>
+      </>}
     </ScrollView>
     {photoSource.sheet}
     </View>
@@ -5388,8 +5423,10 @@ function Nav({
     ["transactions", "Transactions"],
     ["more", "More"],
   ];
+  // Keeps the labels clear of the iPhone home bar.
+  const { bottom } = useIosInsets();
   return (
-    <View style={s.nav}>
+    <View style={[s.nav, bottom > 0 && { paddingBottom: Math.max(22, bottom) }]}>
       {list.map(([id, label]) => {
         const active = page === id;
         return (

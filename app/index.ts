@@ -1,11 +1,15 @@
 import { registerRootComponent } from 'expo';
 import { createElement } from 'react';
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 import App from './App';
+import { EdgeSwipeBack } from './src/EdgeSwipeBack';
 import { ScaledRoot } from './src/ScaledRoot';
 
 function Root() {
-  return createElement(ScaledRoot, null, createElement(App));
+  return createElement(SafeAreaProvider, null,
+    createElement(EdgeSwipeBack, null, createElement(ScaledRoot, null, createElement(App))));
 }
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => Root);
