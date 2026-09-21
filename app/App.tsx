@@ -2142,25 +2142,26 @@ function ContinuousMarquee({ text, clipStyle, textStyle }: { text: string; clipS
 function TransactionRow({ item, last, onPress, onLongPress }: { item: FinanceTransaction; last: boolean; onPress: () => void; onLongPress?: (item: FinanceTransaction) => void }) {
   const hasBill = item.billStatus === 'attached';
   return <Pressable onPress={onPress} onLongPress={onLongPress ? () => { haptic.light(); onLongPress(item); } : undefined} delayLongPress={420} style={({ pressed }) => [ui.homeTransactionRow, !last && ui.homeTransactionBorder, pressed && { backgroundColor: '#F5F7FC' }]}>
-    <TransactionLines title={<MarqueeRemark text={item.description || item.merchant} />} amount={money(item.amount)} meta={`${item.postedLabel} · ${item.category}`} hasBill={hasBill} />
+    <TransactionLines title={<MarqueeRemark text={item.description || item.merchant} />} amount={money(item.amount)} meta={`${item.postedLabel} · ${item.category}`} hasBill={hasBill} billByAmount />
   </Pressable>;
 }
 
 // Two aligned lines used by every transaction list:
 // title ↔ amount on the first line, date · category ↔ bill badge on the second.
-function TransactionLines({ title, amount, meta, hasBill, amountStyle }: { title: ReactNode; amount: string; meta: string; hasBill: boolean; amountStyle?: any }) {
+function TransactionLines({ title, amount, meta, hasBill, amountStyle, billByAmount }: { title: ReactNode; amount: string; meta: string; hasBill: boolean; amountStyle?: any; billByAmount?: boolean }) {
+  // billByAmount: no badge, the amount itself is green when a bill is matched and red when it is missing.
   return <View style={ui.linesWrap}>
     <View style={[ui.line, ui.lineFirst]}>
       <View style={ui.lineLeft}>{title}</View>
-      <View style={ui.lineRight}><Text numberOfLines={1} style={[ui.homeAmount, ui.lineAmount, amountStyle]}>{amount}</Text></View>
+      <View style={ui.lineRight}><Text numberOfLines={1} style={[ui.homeAmount, ui.lineAmount, amountStyle, billByAmount && (hasBill ? ui.amountBilled : ui.amountUnbilled)]} accessibilityLabel={billByAmount ? `${amount}, ${hasBill ? "bill matched" : "bill missing"}` : undefined}>{amount}</Text></View>
     </View>
     <View style={[ui.line, ui.lineSecond]}>
       <View style={ui.lineLeft}><Text numberOfLines={1} style={ui.lineMeta}>{meta}</Text></View>
-      <View style={ui.lineRight}>
+      {!billByAmount && <View style={ui.lineRight}>
         <View style={[ui.homeBillDot, ui.lineBadge, hasBill ? ui.homeBillDotOn : ui.homeBillDotOff]} accessibilityLabel={hasBill ? "Bill matched" : "No bill yet"}>
           {hasBill ? <Check size={15} color="#159148" strokeWidth={3.2} /> : <Plus size={15} color="#E13B48" strokeWidth={3} />}
         </View>
-      </View>
+      </View>}
     </View>
   </View>;
 }
@@ -2395,6 +2396,8 @@ const ui = StyleSheet.create({
   homeMeta: { color: "#8B98B0", fontSize: 14, marginTop: 4 },
   homeAmountArea: { width: 122, minHeight: 46, alignItems: "flex-end", justifyContent: "center", flexShrink: 0, gap: 5 },
   homeAmount: { color: "#17223A", fontSize: 16, fontWeight: "800" },
+  amountBilled: { color: "#159148" },
+  amountUnbilled: { color: "#E13B48" },
   homeBillBadge: { height: 26, borderRadius: 13, paddingHorizontal: 9, flexDirection: "row", alignItems: "center", gap: 4 },
   homeBillDot: { minWidth: 44, height: 26, borderRadius: 13, paddingHorizontal: 12, alignItems: "center", justifyContent: "center", marginTop: 4 },
   homeBillDotOn: { backgroundColor: "#EAF6EF" },
